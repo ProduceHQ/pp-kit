@@ -1,0 +1,294 @@
+import { useState, useMemo } from 'react';
+import { buildBookedMap } from '../utils';
+import DatePicker from '../components/DatePicker';
+
+export default function ProjectForm({ inventory, categories, initialData, projects, editId, onSave, onBack }) {
+  const [form, setForm] = useState({
+    name:      initialData?.name      ?? '',
+    number:    initialData?.number    ?? '',
+    startDate: initialData?.startDate ?? '',
+    endDate:   initialData?.endDate   ?? '',
+  });
+  const [formKit, setFormKit]           = useState(initialData?.kit.map(k => ({ ...k })) ?? []);
+  const [error, setError]               = useState('');
+  const [kitSearch, setKitSearch]       = useState('');
+  const [activeCat, setActiveCat]       = useState(null);
+  const [showLeaveWarning, setShowLeaveWarning] = useState(false);
+
+  // Detect unsaved changes to guard the Back/Cancel actions.
+  const isDirty = useMemo(() => {
+    if (!initialData) {
+      return form.name !== '' || form.number !== '' ||
+             form.startDate !== '' || form.endDate !== '' ||
+             formKit.length > 0;
+    }
+    return (
+      form.name      !== initialData.name      ||
+      form.number    !== initialData.number    ||
+      form.startDate !== initialData.startDate ||
+      form.endDate   !== initialData.endDate   ||
+      JSON.stringify(formKit) !== JSON.stringify(initialData.kit)
+    );
+  }, [form, formKit, initialData]);
+
+  // Single memoized availability pass; re-runs only when dates / bookings change.
+  const bookedMap = useMemo(
+    () => buildBookedMap(inventory, form.startDate, form.endDate, projects, editId),
+    [inventory, form.startDate, form.endDate, projects, editId],
+  );
+
+  const kitGroups = useMemo(() => {
+    const filtered = inventory.filter(item =>
+      item.name.toLowerCase().includes(kitSearch.toLowerCase())
+    );
+    return categories
+      .map(cat => ({ cat, items: filtered.filter(item => item.category === cat) }))
+      .filter(group => group.items.length > 0);
+  }, [inventory, categories, kitSearch]);
+
+  const updateField = (key, value) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    setError('');
+  };
+
+  const toggleItem = (itemId) => {
+    setFormKit(prev =>
+      prev.find(k => k.itemId === itemId)
+        ? prev.filter(k => k.itemId !== itemId)
+        : [...prev, { itemId, qty: 1 }]
+    );
+  };
+
+  const updateQty = (itemId, qty) => {
+    setFormKit(prev => prev.map(k => k.itemId === itemId ? { ...k, qty } : k));
+  };
+
+  const handleSave = () => {
+    if (!form.name.trim()) {
+      setError('Project name is required.');
+      return;
+    }
+    if (!form.startDate || !form.endDate) {
+      setError('Start and end dates are required.');
+      return;
+    }
+    if (form.startDate > form.endDate) {
+      setError('Start date must be before end date.');
+      return;
+    }
+    if (!formKit.length) {
+      setError('Select at least one kit item.');
+      return;
+    }
+    onSave({ ...form, kit: formKit });
+  };
+
+  const handleBack = () => {
+    if (isDirty) {
+      setShowLeaveWarning(true);
+    } else {
+      onBack();
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 860, margin: '0 auto' }}>
+
+      {/* Unsaved changes warning banner */}
+      {showLeaveWarning && (
+        <div style={{
+          background: '#130a00', border: '1px solid #5a3a00', borderRadius: 3,
+          padding: '13px 18px', marginBottom: 16,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+        }}>
+          <span style={{ fontSize: 12, color: '#e0a040' }}>⚠ You have unsaved changes. Leave anyway?</span>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button className="bo" onClick={onBack}>Discard changes</button>
+            <button className="by" onClick={() => setShowLeaveWarning(false)}>Keep editing</button>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
+        <button className="bo" onClick={handleBack}>← Back</button>
+        <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 32, letterSpacing: '.04em' }}>
+          {editId ? 'EDIT PROJECT' : 'NEW PROJECT'}
+        </h1>
+      </div>
+
+      {/* Project details */}
+      <div className="ca" style={{ padding: '18px 20px', marginBottom: 14 }}>
+        <div style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 14 }}>Project Details</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div style={{ gridColumn: '1/-1' }}>
+            <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              Project Name *
+            </label>
+            <input
+              className="fi"
+              placeholder="e.g. Nike Spring Campaign"
+              value={form.name}
+              onChange={e => updateField('name', e.target.value)}
+            />
+          </div>
+          <div>
+            <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              Project Number
+            </label>
+            <input
+              className="fi"
+              value={form.number}
+              onChange={e => updateField('number', e.target.value)}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                Start Date *
+              </label>
+              <DatePicker
+                value={form.startDate}
+                onChange={v => updateField('startDate', v)}
+                placeholder="Select start date"
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+                End Date *
+              </label>
+              <DatePicker
+                value={form.endDate}
+                onChange={v => updateField('endDate', v)}
+                placeholder="Select end date"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Kit selector */}
+      <div className="ca" style={{ marginBottom: 14 }}>
+        <div style={{ padding: '13px 16px', borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase' }}>Select Kit</span>
+            {(!form.startDate || !form.endDate) && (
+              <span style={{ fontSize: 11, color: '#444', fontStyle: 'italic' }}>Set dates to see live availability</span>
+            )}
+          </div>
+          <span style={{ fontSize: 11, color: formKit.length ? '#e8b842' : '#444' }}>{formKit.length} selected</span>
+        </div>
+
+        {/* Category tabs */}
+        <div style={{ padding: '7px 10px', borderBottom: '1px solid #141414', display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+          <button className={`ct${activeCat === null ? ' on' : ''}`} onClick={() => setActiveCat(null)}>All</button>
+          {categories.map(c => (
+            <button key={c} className={`ct${activeCat === c ? ' on' : ''}`} onClick={() => setActiveCat(activeCat === c ? null : c)}>{c}</button>
+          ))}
+        </div>
+
+        {/* Search */}
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid #141414' }}>
+          <div className="sw">
+            <span>⌕</span>
+            <input className="fi" placeholder="Search kit..." value={kitSearch} onChange={e => setKitSearch(e.target.value)} />
+          </div>
+        </div>
+
+        {/* Item rows — buttons for keyboard accessibility */}
+        <div style={{ maxHeight: 450, overflowY: 'auto' }} role="list">
+          {kitGroups.filter(group => activeCat === null || group.cat === activeCat).map(({ cat, items }) => (
+            <div key={cat}>
+              <div className="dl">{cat}</div>
+              {items.map(item => {
+                const booked = bookedMap[item.id] ?? 0;
+                const avail  = item.qty - booked;
+                const sel    = formKit.find(k => k.itemId === item.id);
+                const locked = avail <= 0 && !sel;
+
+                return (
+                  <button
+                    key={item.id}
+                    role="listitem"
+                    className={`ro${sel ? ' sl' : ''}`}
+                    onClick={() => { if (!locked) toggleItem(item.id); }}
+                    disabled={locked}
+                    aria-pressed={!!sel}
+                    aria-label={`${item.name}. ${locked ? 'Not available' : `${avail} available`}${sel ? ', selected' : ''}`}
+                  >
+                    <div className={`ck${sel ? ' on' : ''}`} aria-hidden="true">
+                      {sel && <span style={{ fontSize: 11, color: '#090909', fontWeight: 700 }}>✓</span>}
+                    </div>
+                    <span style={{ flex: 1, fontSize: 12, color: locked ? '#333' : '#c9c4ba', textAlign: 'left' }}>
+                      {item.name}
+                    </span>
+                    {sel && (
+                      <div
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 14 }}
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <span style={{ fontSize: 11, color: '#444' }}>Qty</span>
+                        <input
+                          className="qb"
+                          type="number"
+                          min={1}
+                          max={avail}
+                          value={sel.qty}
+                          aria-label={`Quantity for ${item.name}`}
+                          onChange={e => updateQty(item.id, Math.max(1, Math.min(avail, parseInt(e.target.value) || 1)))}
+                        />
+                      </div>
+                    )}
+                    <span style={{
+                      fontSize: 11, minWidth: 68, textAlign: 'right',
+                      color: locked ? '#4a1515' : avail < item.qty ? '#8a6000' : '#1a5a30',
+                    }}>
+                      {locked ? 'BOOKED' : `${avail} avail`}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Booking summary */}
+      {formKit.length > 0 && (
+        <div className="ca" style={{ padding: '14px 18px', marginBottom: 14, borderColor: '#1c1500' }}>
+          <div style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+            Booking Summary
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {formKit.map(k => {
+              const item = inventory.find(i => i.id === k.itemId);
+              return item ? (
+                <span key={k.itemId} style={{
+                  background: '#130f00', border: '1px solid #2a2000',
+                  borderRadius: 2, padding: '4px 12px', fontSize: 11, color: '#c0a040',
+                }}>
+                  {item.name}{k.qty > 1 ? ` ×${k.qty}` : ''}
+                </span>
+              ) : null;
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Validation error */}
+      {error && (
+        <div style={{
+          background: '#130606', border: '1px solid #4a1515', borderRadius: 2,
+          padding: '10px 16px', fontSize: 12, color: '#e07070', marginBottom: 14,
+        }}>
+          ⚠ {error}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <button className="bo" onClick={handleBack}>Cancel</button>
+        <button className="by" onClick={handleSave}>{editId ? 'Save Changes' : 'Create Booking'}</button>
+      </div>
+    </div>
+  );
+}
