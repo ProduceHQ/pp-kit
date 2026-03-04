@@ -40,7 +40,7 @@ export default function AccessGate({ children }) {
           40%,80%{transform:translateX(8px)}
         }
         .ag-shake { animation: shake 0.4s ease; }
-        .ag-input { background:#111;border:1px solid #1e1e1e;color:#d8d3c9;padding:12px 16px;font-size:14px;font-family:'DM Mono',monospace;border-radius:2px;width:100%;letter-spacing:.2em;text-align:center;transition:border-color .15s; }
+        .ag-input { background:#111;border:1px solid #1e1e1e;color:#d8d3c9;padding:12px 16px;font-size:14px;font-family:'DM Mono',monospace;border-radius:2px;width:100%;box-sizing:border-box;letter-spacing:.2em;text-align:center;transition:border-color .15s; }
         .ag-input:focus { outline:none;border-color:#e8b842; }
         .ag-input::placeholder { letter-spacing:.05em;color:#333; }
         .ag-btn { background:#e8b842;color:#090909;border:none;padding:12px;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:2px;width:100%;font-family:'DM Mono',monospace;transition:opacity .15s;margin-top:8px; }
