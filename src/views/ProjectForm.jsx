@@ -196,51 +196,72 @@ export default function ProjectForm({ inventory, categories, initialData, projec
           </div>
         </div>
 
-        {/* Unit rows */}
+        {/* Unit rows — grouped by name within each category */}
         <div style={{ maxHeight: 450, overflowY: 'auto' }} role="list">
-          {kitGroups.filter(group => activeCat === null || group.cat === activeCat).map(({ cat, units }) => (
-            <div key={cat}>
-              <div className="dl">{cat}</div>
-              {units.map(unit => {
-                const label  = unitLabel(unit, inventory);
-                const sel    = formKit.some(k => k.itemId === unit.id);
-                // Locked = booked by another project AND not currently in this form's kit
-                const locked = bookedSet.has(unit.id) && !sel;
+          {kitGroups.filter(group => activeCat === null || group.cat === activeCat).map(({ cat, units }) => {
+            // Group units by name within this category
+            const byName = {};
+            for (const unit of units) (byName[unit.name] ??= []).push(unit);
 
-                return (
-                  <button
-                    key={unit.id}
-                    role="listitem"
-                    className={`ro${sel ? ' sl' : ''}`}
-                    onClick={() => { if (!locked) toggleItem(unit.id); }}
-                    disabled={locked}
-                    aria-pressed={sel}
-                    aria-label={`${label}. ${locked ? 'Not available' : 'Available'}${sel ? ', selected' : ''}`}
-                  >
-                    <div className={`ck${sel ? ' on' : ''}`} aria-hidden="true">
-                      {sel && <span style={{ fontSize: 11, color: '#090909', fontWeight: 700 }}>✓</span>}
-                    </div>
-                    <div style={{ flex: 1, textAlign: 'left' }}>
-                      <div style={{ fontSize: 12, color: locked ? '#333' : '#c9c4ba' }}>
-                        {label}
-                      </div>
-                      {unit.serial_number && (
-                        <div style={{ fontSize: 10, color: locked ? '#2a2a2a' : '#555', marginTop: 2, letterSpacing: '.04em' }}>
-                          {unit.serial_number}
-                        </div>
-                      )}
-                    </div>
-                    <span style={{
-                      fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0,
-                      color: locked ? '#4a1515' : '#1a5a30',
+            return (
+              <div key={cat}>
+                <div className="dl">{cat}</div>
+                {Object.entries(byName).map(([name, nameUnits]) => (
+                  <div key={name}>
+                    {/* Item name header row (non-interactive) */}
+                    <div style={{
+                      padding: '8px 14px 4px',
+                      background: '#0a0a0a',
+                      borderBottom: '1px solid #131313',
+                      fontSize: 12,
+                      color: '#888',
                     }}>
-                      {locked ? 'BOOKED' : 'FREE'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ))}
+                      {name}
+                    </div>
+
+                    {/* Individual unit sub-rows */}
+                    {nameUnits.map(unit => {
+                      const sel    = formKit.some(k => k.itemId === unit.id);
+                      const locked = bookedSet.has(unit.id) && !sel;
+
+                      return (
+                        <button
+                          key={unit.id}
+                          role="listitem"
+                          className={`ro${sel ? ' sl' : ''}`}
+                          onClick={() => { if (!locked) toggleItem(unit.id); }}
+                          disabled={locked}
+                          aria-pressed={sel}
+                          aria-label={`${name} unit ${unit.unit_number}. ${locked ? 'Not available' : 'Available'}${sel ? ', selected' : ''}`}
+                          style={{ paddingLeft: 28 }}
+                        >
+                          <div className={`ck${sel ? ' on' : ''}`} aria-hidden="true">
+                            {sel && <span style={{ fontSize: 11, color: '#090909', fontWeight: 700 }}>✓</span>}
+                          </div>
+                          <div style={{ flex: 1, textAlign: 'left' }}>
+                            <span style={{ fontSize: 11, color: locked ? '#3a3a3a' : '#777', letterSpacing: '.04em' }}>
+                              ({unit.unit_number})
+                            </span>
+                            {unit.serial_number && (
+                              <span style={{ fontSize: 11, color: locked ? '#2a2a2a' : '#555', marginLeft: 10, letterSpacing: '.04em' }}>
+                                {unit.serial_number}
+                              </span>
+                            )}
+                          </div>
+                          <span style={{
+                            fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0,
+                            color: locked ? '#4a1515' : '#1a5a30',
+                          }}>
+                            {locked ? 'BOOKED' : 'FREE'}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 

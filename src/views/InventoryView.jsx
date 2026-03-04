@@ -262,31 +262,33 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
         {categories.filter(c => category === 'All' || c === category).map(cat => {
           const units = filteredUnits.filter(u => u.category === cat);
           if (!units.length) return null;
+
+          // Group by name within this category for the stacked view
+          const byName = {};
+          for (const unit of units) (byName[unit.name] ??= []).push(unit);
+
           return (
             <div key={cat} className="ca">
               <div style={{ padding: '10px 14px', borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 10, letterSpacing: '.1em', color: '#e8b842', textTransform: 'uppercase' }}>{cat}</span>
-                <span style={{ fontSize: 10, color: '#2e2e2e' }}>({units.length})</span>
+                <span style={{ fontSize: 10, color: '#2e2e2e' }}>({Object.keys(byName).length})</span>
               </div>
-              {units.map(unit => {
-                const isBooked = bookedSet.has(unit.id);
-                const label = unitLabel(unit, inventory);
+              {Object.entries(byName).map(([name, nameUnits]) => {
+                const total  = nameUnits.length;
+                const free   = nameUnits.filter(u => !bookedSet.has(u.id)).length;
+                const allOut = free === 0;
+                const someOut = free < total;
                 return (
-                  <div key={unit.id} style={{ padding: '9px 14px', borderBottom: '1px solid #111' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: isBooked ? '#3a3a3a' : '#c9c4ba' }}>{label}</span>
-                      <div style={{ marginLeft: 8, flexShrink: 0 }}>
-                        {isBooked
-                          ? <Pill variant="red">Booked</Pill>
-                          : <Pill variant="green">Free</Pill>
-                        }
-                      </div>
+                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: '1px solid #111' }}>
+                    <span style={{ fontSize: 12, color: allOut ? '#3a3a3a' : '#c9c4ba' }}>{name}</span>
+                    <div style={{ marginLeft: 8, flexShrink: 0 }}>
+                      {allOut
+                        ? <Pill variant="red">0/{total}</Pill>
+                        : someOut
+                          ? <Pill variant="amber">{free}/{total}</Pill>
+                          : <Pill variant="green">{total === 1 ? 'Free' : `${free}/${total}`}</Pill>
+                      }
                     </div>
-                    {unit.serial_number && (
-                      <div style={{ fontSize: 10, color: '#444', marginTop: 3, letterSpacing: '.04em' }}>
-                        {unit.serial_number}
-                      </div>
-                    )}
                   </div>
                 );
               })}
