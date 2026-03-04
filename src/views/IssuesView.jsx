@@ -11,7 +11,7 @@ export default function IssuesView({ inventory, onResolve }) {
     return (
       <div style={{ marginBottom: 20 }}>
         <div style={{
-          fontSize: 10, color: '#e8b842', letterSpacing: '.12em',
+          fontSize: 10, color: 'var(--accent)', letterSpacing: '.12em',
           textTransform: 'uppercase', marginBottom: 10,
         }}>
           {title} ({units.length})
@@ -20,14 +20,14 @@ export default function IssuesView({ inventory, onResolve }) {
           {units.map(unit => (
             <div key={unit.id} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '12px 16px', borderBottom: '1px solid #141414', gap: 16,
+              padding: '12px 16px', borderBottom: '1px solid var(--bd-sub)', gap: 16,
             }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, color: '#c9c4ba', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ fontSize: 12, color: 'var(--tx)', display: 'flex', alignItems: 'center', gap: 10 }}>
                   {unitLabel(unit, inventory)}
                   <Pill variant={pillVariant}>{unit.status}</Pill>
                 </div>
-                <div style={{ fontSize: 10, color: '#555', marginTop: 3, letterSpacing: '.04em' }}>
+                <div style={{ fontSize: 10, color: 'var(--tx-muted)', marginTop: 3, letterSpacing: '.04em' }}>
                   {unit.category}
                   {unit.serial_number && <span style={{ marginLeft: 12 }}>{unit.serial_number}</span>}
                 </div>
@@ -50,7 +50,7 @@ export default function IssuesView({ inventory, onResolve }) {
     <div>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>ISSUES</h1>
-        <p style={{ color: '#444', fontSize: 11, marginTop: 4 }}>
+        <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>
           {flagged.length
             ? `${flagged.length} item${flagged.length !== 1 ? 's' : ''} need attention`
             : 'No issues — all kit is accounted for'}
@@ -58,7 +58,7 @@ export default function IssuesView({ inventory, onResolve }) {
       </div>
 
       {!flagged.length && (
-        <div style={{ border: '1px dashed #1e1e1e', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: '#3a3a3a' }}>
+        <div style={{ border: '1px dashed var(--bd-inp)', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
           <div style={{ fontFamily: "'Bebas Neue'", fontSize: 28, marginBottom: 8 }}>ALL CLEAR</div>
           <div style={{ fontSize: 12 }}>No damaged or missing items</div>
         </div>

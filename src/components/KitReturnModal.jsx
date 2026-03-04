@@ -34,16 +34,16 @@ export default function KitReturnModal({ project, inventory, onSubmit, onCancel 
       zIndex: 1000, padding: 24,
     }}>
       <div style={{
-        background: '#0e0e0e', border: '1px solid #2a2a2a', borderRadius: 4,
+        background: 'var(--bg-card)', border: '1px solid var(--bd)', borderRadius: 4,
         width: '100%', maxWidth: 560, maxHeight: '85vh',
         display: 'flex', flexDirection: 'column',
       }}>
         {/* Header */}
-        <div style={{ padding: '18px 22px', borderBottom: '1px solid #1e1e1e' }}>
-          <div style={{ fontFamily: "'Bebas Neue'", fontSize: 22, letterSpacing: '.04em', color: '#d8d3c9' }}>
+        <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--bd-inp)' }}>
+          <div style={{ fontFamily: "'Bebas Neue'", fontSize: 22, letterSpacing: '.04em', color: 'var(--tx)' }}>
             KIT RETURN — {project.name}
           </div>
-          <div style={{ fontSize: 11, color: '#444', marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: 'var(--tx-dim)', marginTop: 4 }}>
             Mark the condition of each item
           </div>
         </div>
@@ -52,16 +52,16 @@ export default function KitReturnModal({ project, inventory, onSubmit, onCancel 
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {kitUnits.map(unit => (
             <div key={unit.id} style={{
-              padding: '12px 22px', borderBottom: '1px solid #161616',
+              padding: '12px 22px', borderBottom: '1px solid var(--bd-div)',
               display: 'flex', alignItems: 'center', gap: 16,
             }}>
               {/* Unit info */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, color: '#c9c4ba' }}>
+                <div style={{ fontSize: 12, color: 'var(--tx)' }}>
                   {unitLabel(unit, inventory)}
                 </div>
                 {unit.serial_number && (
-                  <div style={{ fontSize: 10, color: '#444', marginTop: 2, letterSpacing: '.04em' }}>
+                  <div style={{ fontSize: 10, color: 'var(--tx-dim)', marginTop: 2, letterSpacing: '.04em' }}>
                     {unit.serial_number}
                   </div>
                 )}
@@ -78,9 +78,9 @@ export default function KitReturnModal({ project, inventory, onSubmit, onCancel 
                       style={{
                         padding: '5px 12px', fontSize: 10, letterSpacing: '.06em',
                         textTransform: 'uppercase', cursor: 'pointer', borderRadius: 2,
-                        border: `1px solid ${isSelected ? opt.color : '#252525'}`,
+                        border: `1px solid ${isSelected ? opt.color : 'var(--bd)'}`,
                         background: isSelected ? `${opt.color}22` : 'none',
-                        color: isSelected ? opt.color : '#444',
+                        color: isSelected ? opt.color : 'var(--tx-dim)',
                         transition: 'all .12s',
                       }}
                     >
@@ -95,10 +95,10 @@ export default function KitReturnModal({ project, inventory, onSubmit, onCancel 
 
         {/* Footer */}
         <div style={{
-          padding: '16px 22px', borderTop: '1px solid #1e1e1e',
+          padding: '16px 22px', borderTop: '1px solid var(--bd-inp)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
         }}>
-          <div style={{ fontSize: 11, color: issueCount > 0 ? '#c44' : '#444' }}>
+          <div style={{ fontSize: 11, color: issueCount > 0 ? '#c44' : 'var(--tx-dim)' }}>
             {issueCount > 0
               ? `⚠ ${issueCount} item${issueCount !== 1 ? 's' : ''} flagged`
               : 'All items accounted for'}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useLayoutEffect, useEffect, useMemo } from 'react';
 import * as api from './lib/api';
 import AccessGate from './components/AccessGate';
 import RegionSelect from './components/RegionSelect';
@@ -10,65 +10,98 @@ import IssuesView    from './views/IssuesView';
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#111}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+
+  /* ── Theme variables ─────────────────────────────────────────────────────── */
+  :root,[data-theme="dark"]{
+    --bg:#090909;--bg-card:#0e0e0e;--bg-proj:#0c0c0c;--bg-sub:#0a0a0a;
+    --bg-input:#111;--bg-tag:#161616;--bg-row-h:#131313;--bg-row-sel:#161200;
+    --bg-qty:#181818;--bg-dp:#111;
+    --bd:#1c1c1c;--bd-proj:#1a1a1a;--bd-inp:#1e1e1e;--bd-tag:#222;
+    --bd-div:#161616;--bd-sub:#141414;--bd-cat:#181818;--bd-dp:#2a2a2a;
+    --bd-qty:#282828;--bd-ck:#2e2e2e;
+    --tx:#d8d3c9;--tx-sub:#888;--tx-muted:#555;--tx-dim:#444;--tx-vdim:#3a3a3a;
+    --accent:#e8b842;--hdr-sub:#2a2a2a;--hdr-region:#3a3a3a;
+    --nav-bd:#181818;--dp-today-bg:#1a1500;--dp-today-bd:#3a3000;--dp-day:#b0aba2;
+    --ct-on-bg:#1a1500;--scroll-track:#111;--scroll-thumb:#333;
+    --dp-shadow:0 8px 32px rgba(0,0,0,.7);
+  }
+  [data-theme="light"]{
+    --bg:#f4f1eb;--bg-card:#fff;--bg-proj:#fafaf8;--bg-sub:#f0ede8;
+    --bg-input:#fff;--bg-tag:#eceae5;--bg-row-h:#f0ede8;--bg-row-sel:#fffbee;
+    --bg-qty:#f0ede8;--bg-dp:#fff;
+    --bd:#e0ddd8;--bd-proj:#e5e2dc;--bd-inp:#d0cdc8;--bd-tag:#dedad4;
+    --bd-div:#e8e5e0;--bd-sub:#ece9e4;--bd-cat:#e8e5e0;--bd-dp:#d0cdc8;
+    --bd-qty:#d0cdc8;--bd-ck:#c0bdb8;
+    --tx:#1a1a18;--tx-sub:#555;--tx-muted:#888;--tx-dim:#999;--tx-vdim:#aaa;
+    --hdr-sub:#b8b5ae;--hdr-region:#aaa;
+    --nav-bd:#e8e5e0;--dp-today-bg:#fff8e0;--dp-today-bd:#e8c840;--dp-day:#333;
+    --ct-on-bg:#fff8e0;--scroll-track:#e8e5e0;--scroll-thumb:#c8c5c0;
+    --dp-shadow:0 4px 16px rgba(0,0,0,.1);
+  }
+  html,body{background:var(--bg);transition:background .2s}
+
+  ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--scroll-track)}::-webkit-scrollbar-thumb{background:var(--scroll-thumb);border-radius:3px}
   input,select,button{font-family:'DM Mono',monospace}
 
   /* Nav buttons */
-  .nb{background:none;border:none;color:#555;font-size:11px;cursor:pointer;padding:14px 20px;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .15s}
-  .nb:hover{color:#aaa}.nb.on{color:#e8b842;border-bottom-color:#e8b842}
+  .nb{background:none;border:none;color:var(--tx-muted);font-size:11px;cursor:pointer;padding:14px 20px;letter-spacing:.1em;text-transform:uppercase;border-bottom:2px solid transparent;transition:all .15s}
+  .nb:hover{color:var(--tx-sub)}.nb.on{color:var(--accent);border-bottom-color:var(--accent)}
 
   /* Action buttons */
-  .by{background:#e8b842;color:#090909;border:none;padding:10px 22px;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .15s}
+  .by{background:var(--accent);color:#090909;border:none;padding:10px 22px;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:opacity .15s}
   .by:hover{opacity:.85}
-  .bo{background:none;border:1px solid #252525;color:#666;padding:8px 16px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s}
-  .bo:hover{border-color:#444;color:#bbb}
+  .bo{background:none;border:1px solid var(--bd);color:var(--tx-muted);padding:8px 16px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .15s}
+  .bo:hover{border-color:var(--tx-muted);color:var(--tx)}
   .bd{background:none;border:1px solid #3a1515;color:#c44;padding:6px 14px;font-size:11px;cursor:pointer;border-radius:2px;transition:all .15s}
   .bd:hover{background:#1a0808}
 
   /* Form input */
-  .fi{background:#111;border:1px solid #1e1e1e;color:#d8d3c9;padding:10px 13px;font-size:12px;border-radius:2px;width:100%;transition:border-color .15s}
-  .fi:focus{outline:none;border-color:#e8b842}
+  .fi{background:var(--bg-input);border:1px solid var(--bd-inp);color:var(--tx);padding:10px 13px;font-size:12px;border-radius:2px;width:100%;transition:border-color .15s}
+  .fi:focus{outline:none;border-color:var(--accent)}
 
   /* Card */
-  .ca{background:#0e0e0e;border:1px solid #1c1c1c;border-radius:3px}
+  .ca{background:var(--bg-card);border:1px solid var(--bd);border-radius:3px}
 
   /* Kit row */
-  .ro{display:flex;align-items:center;padding:10px 14px;border:none;border-bottom:1px solid #141414;cursor:pointer;transition:background .1s;background:none;width:100%;text-align:left;color:inherit}
-  .ro:hover:not(:disabled){background:#131313}
-  .ro.sl{background:#161200;box-shadow:inset 3px 0 0 #e8b842}
+  .ro{display:flex;align-items:center;padding:10px 14px;border:none;border-bottom:1px solid var(--bd-sub);cursor:pointer;transition:background .1s;background:none;width:100%;text-align:left;color:inherit}
+  .ro:hover:not(:disabled){background:var(--bg-row-h)}
+  .ro.sl{background:var(--bg-row-sel);box-shadow:inset 3px 0 0 var(--accent)}
   .ro:disabled{opacity:.35;cursor:not-allowed}
-  .ro:focus-visible{outline:1px solid #e8b842;outline-offset:-1px}
+  .ro:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 
   /* Checkbox */
-  .ck{width:18px;height:18px;border-radius:2px;border:1.5px solid #2e2e2e;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:13px;transition:all .15s}
-  .ck.on{background:#e8b842;border-color:#e8b842}
+  .ck{width:18px;height:18px;border-radius:2px;border:1.5px solid var(--bd-ck);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:13px;transition:all .15s}
+  .ck.on{background:var(--accent);border-color:var(--accent)}
 
   /* Qty input */
-  .qb{background:#181818;border:1px solid #282828;color:#d8d3c9;width:50px;text-align:center;padding:4px;font-size:12px;border-radius:2px}
+  .qb{background:var(--bg-qty);border:1px solid var(--bd-qty);color:var(--tx);width:50px;text-align:center;padding:4px;font-size:12px;border-radius:2px}
 
   /* Category tab */
-  .ct{background:none;border:none;padding:6px 13px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;color:#555;transition:all .15s}
-  .ct:hover{color:#aaa}.ct.on{background:#1a1500;color:#e8b842}
+  .ct{background:none;border:none;padding:6px 13px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px;color:var(--tx-muted);transition:all .15s}
+  .ct:hover{color:var(--tx)}.ct.on{background:var(--ct-on-bg);color:var(--accent)}
 
   /* Project card */
-  .pc{border:1px solid #1a1a1a;border-radius:3px;background:#0c0c0c;padding:18px 20px;transition:border-color .2s}
-  .pc:hover{border-color:#2a2a2a}
+  .pc{border:1px solid var(--bd-proj);border-radius:3px;background:var(--bg-proj);padding:18px 20px;transition:border-color .2s}
+  .pc:hover{border-color:var(--bd)}
 
   /* Search wrapper */
-  .sw{position:relative}.sw span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#555;font-size:15px;pointer-events:none}
+  .sw{position:relative}.sw span{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--tx-muted);font-size:15px;pointer-events:none}
   .sw input{padding-left:34px}
 
   /* Kit tag */
-  .tg{background:#161616;border:1px solid #222;border-radius:2px;padding:3px 10px;font-size:11px;color:#888}
+  .tg{background:var(--bg-tag);border:1px solid var(--bd-tag);border-radius:2px;padding:3px 10px;font-size:11px;color:var(--tx-sub)}
 
   /* Category divider */
-  .dl{padding:7px 14px;background:#0c0c0c;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#e8b842;border-bottom:1px solid #161616;border-top:1px solid #161616}
+  .dl{padding:7px 14px;background:var(--bg-proj);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--bd-div);border-top:1px solid var(--bd-div)}
 
   /* DatePicker day hover */
-  .dp-day:not([data-selected="true"]):hover{background:#1e1e1e !important}
+  .dp-day:not([data-selected="true"]):hover{background:var(--bg-row-h) !important}
 `;
 
 export default function App() {
+  const [isDark, setIsDark] = useState(() => {
+    try { return localStorage.getItem('pp-kit-theme') !== 'light'; } catch { return true; }
+  });
   const [region, setRegion]           = useState(null);
   const [view, setView]               = useState('inventory');
   const [projects, setProjects]       = useState([]);
@@ -76,6 +109,12 @@ export default function App() {
   const [editProject, setEditProject] = useState(null);
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState(null);
+
+  // Apply theme to <html> before paint so there's no flash.
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    try { localStorage.setItem('pp-kit-theme', isDark ? 'dark' : 'light'); } catch {}
+  }, [isDark]);
 
   // Derive categories dynamically from current inventory.
   const categories = useMemo(
@@ -115,26 +154,22 @@ export default function App() {
     try {
       const dataWithRegion = { ...data, region };
       if (editProject) {
-        // Optimistic update
         setProjects(prev => prev.map(p =>
           p.id === editProject.id ? { ...p, ...dataWithRegion } : p
         ));
         await api.saveProject(dataWithRegion, editProject.id);
       } else {
-        // Persist first to get the new UUID, then add to local state
         const newId = await api.saveProject(dataWithRegion);
         setProjects(prev => [...prev, { id: newId, ...dataWithRegion }]);
       }
       setView('projects');
     } catch (e) {
       alert('Failed to save project: ' + e.message);
-      // Revert: reload from server
       api.getProjects(region).then(setProjects).catch(() => {});
     }
   };
 
   const handleProjectDelete = async (id) => {
-    // Optimistic remove
     setProjects(prev => prev.filter(p => p.id !== id));
     try {
       await api.deleteProject(id);
@@ -164,7 +199,6 @@ export default function App() {
   };
 
   const handleInventoryUpdate = async (id, updates) => {
-    // Optimistic update
     setInventory(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
     try {
       await api.updateInventoryItem(id, updates);
@@ -188,9 +222,7 @@ export default function App() {
 
   const handleKitReturned = async (projectId, returnItems) => {
     const returnedAt = new Date().toISOString();
-    // Optimistically update project
     setProjects(prev => prev.map(p => p.id === projectId ? { ...p, returnedAt } : p));
-    // Optimistically flag damaged/missing units
     const updates = returnItems.filter(r => r.status !== 'returned');
     setInventory(prev => prev.map(u => {
       const match = updates.find(r => r.unitId === u.id);
@@ -220,7 +252,6 @@ export default function App() {
   };
 
   const handleInventoryDelete = async (id) => {
-    // Optimistic remove
     setInventory(prev => prev.filter(item => item.id !== id));
     try {
       await api.deleteInventoryItem(id);
@@ -236,14 +267,14 @@ export default function App() {
       {!region ? (
         <RegionSelect onSelect={setRegion} />
       ) : (
-        <div style={{ fontFamily: "'DM Mono',monospace", minHeight: '100vh', background: '#090909', color: '#d8d3c9' }}>
+        <div style={{ fontFamily: "'DM Mono',monospace", minHeight: '100vh', background: 'var(--bg)', color: 'var(--tx)', transition: 'background .2s,color .2s' }}>
           <style>{GLOBAL_STYLES}</style>
 
-          <header style={{ borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+          <header style={{ background: 'var(--bg)', borderBottom: '1px solid var(--nav-bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: '#e8b842', letterSpacing: '.08em' }}>PERSPECTIVE PICTURES</span>
-              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 18, color: '#2a2a2a', letterSpacing: '.08em' }}>/ KIT</span>
-              <span style={{ fontSize: 10, color: '#3a3a3a', letterSpacing: '.12em', textTransform: 'uppercase', marginLeft: 6 }}>
+              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: 'var(--accent)', letterSpacing: '.08em' }}>PERSPECTIVE PICTURES</span>
+              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 18, color: 'var(--hdr-sub)', letterSpacing: '.08em' }}>/ KIT</span>
+              <span style={{ fontSize: 10, color: 'var(--hdr-region)', letterSpacing: '.12em', textTransform: 'uppercase', marginLeft: 6 }}>
                 ● {region.toUpperCase()}
               </span>
             </div>
@@ -281,7 +312,7 @@ export default function App() {
 
           <main style={{ padding: '26px 28px', maxWidth: 1120, margin: '0 auto' }}>
             {loading && (
-              <div style={{ textAlign: 'center', padding: '80px 0', color: '#333', fontSize: 12, letterSpacing: '.1em' }}>
+              <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--tx-vdim)', fontSize: 12, letterSpacing: '.1em' }}>
                 Loading…
               </div>
             )}
@@ -289,7 +320,7 @@ export default function App() {
             {error && (
               <div style={{ textAlign: 'center', padding: '80px 0' }}>
                 <div style={{ color: '#c44', fontSize: 13, marginBottom: 12 }}>Failed to connect to database</div>
-                <div style={{ color: '#444', fontSize: 11 }}>{error}</div>
+                <div style={{ color: 'var(--tx-dim)', fontSize: 11 }}>{error}</div>
                 <button className="bo" style={{ marginTop: 20 }} onClick={() => window.location.reload()}>
                   Retry
                 </button>
@@ -341,6 +372,25 @@ export default function App() {
               </>
             )}
           </main>
+
+          {/* Dark / light mode toggle */}
+          <button
+            onClick={() => setIsDark(d => !d)}
+            style={{
+              position: 'fixed', bottom: 24, right: 24, zIndex: 500,
+              width: 44, height: 44, borderRadius: '50%',
+              background: isDark ? '#1c1c1c' : '#fff',
+              border: `1px solid ${isDark ? '#2e2e2e' : '#d0cdc8'}`,
+              color: isDark ? '#e8b842' : '#777',
+              fontSize: 18, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: isDark ? '0 2px 16px rgba(0,0,0,.6)' : '0 2px 16px rgba(0,0,0,.1)',
+              transition: 'all .2s',
+            }}
+            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? '☀' : '🌙'}
+          </button>
         </div>
       )}
     </AccessGate>

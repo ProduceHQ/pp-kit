@@ -59,7 +59,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22 }}>
         <div>
           <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>PROJECTS</h1>
-          <p style={{ color: '#444', fontSize: 11, marginTop: 4 }}>
+          <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>
             {activeProjects.length} active booking{activeProjects.length !== 1 ? 's' : ''}
             {pastProjects.length > 0 && ` · ${pastProjects.length} past`}
           </p>
@@ -75,7 +75,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
       </div>
 
       {!visibleProjects.length && (
-        <div style={{ border: '1px dashed #1e1e1e', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: '#3a3a3a' }}>
+        <div style={{ border: '1px dashed var(--bd-inp)', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
           <div style={{ fontFamily: "'Bebas Neue'", fontSize: 28, marginBottom: 8 }}>NO PROJECTS YET</div>
           <div style={{ fontSize: 12 }}>Create a project to start booking kit</div>
         </div>
@@ -100,7 +100,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {/* Title + pills */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                    <h2 style={{ fontFamily: "'Bebas Neue'", fontSize: 21, letterSpacing: '.04em', color: '#d8d3c9' }}>{project.name}</h2>
+                    <h2 style={{ fontFamily: "'Bebas Neue'", fontSize: 21, letterSpacing: '.04em', color: 'var(--tx)' }}>{project.name}</h2>
                     <Pill variant={status.variant}>{status.label}</Pill>
                     {isPacked && !isReturned && <Pill variant="green">Packed</Pill>}
                     {isReturned && <Pill variant="grey">Returned</Pill>}
@@ -108,8 +108,8 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                   </div>
 
                   {/* Meta */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, color: '#4a4a4a', fontSize: 11, marginBottom: 14 }}>
-                    <span style={{ color: '#e8b842' }}>{project.number || '—'}</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 18, color: 'var(--tx-dim)', fontSize: 11, marginBottom: 14 }}>
+                    <span style={{ color: 'var(--accent)' }}>{project.number || '—'}</span>
                     <span>{fmtDate(project.startDate)} — {fmtDate(project.endDate)}</span>
                     <span>{totalUnits} unit{totalUnits !== 1 ? 's' : ''}</span>
                   </div>
@@ -118,17 +118,17 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                   <div style={{ marginTop: 4 }}>
                     {allCats.map(cat => (
                       <div key={cat} style={{ marginBottom: 10 }}>
-                        <div style={{ fontSize: 9, color: '#e8b842', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
+                        <div style={{ fontSize: 9, color: 'var(--accent)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
                           {cat}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {kitGroups[cat].map(unit => {
                             const flagged = unit.status && unit.status !== 'available';
                             return (
-                              <div key={unit.id} style={{ fontSize: 11, color: flagged ? '#c44' : '#888', display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div key={unit.id} style={{ fontSize: 11, color: flagged ? '#c44' : 'var(--tx-sub)', display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span>{unitLabel(unit, inventory)}</span>
                                 {unit.serial_number && (
-                                  <span style={{ color: '#444', fontSize: 10, letterSpacing: '.04em' }}>
+                                  <span style={{ color: 'var(--tx-dim)', fontSize: 10, letterSpacing: '.04em' }}>
                                     {unit.serial_number}
                                   </span>
                                 )}

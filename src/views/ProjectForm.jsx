@@ -120,10 +120,10 @@ export default function ProjectForm({ inventory, categories, initialData, projec
 
       {/* Project details */}
       <div className="ca" style={{ padding: '18px 20px', marginBottom: 14 }}>
-        <div style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 14 }}>Project Details</div>
+        <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 14 }}>Project Details</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div style={{ gridColumn: '1/-1' }}>
-            <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            <label style={{ fontSize: 10, color: 'var(--tx-dim)', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
               Project Name *
             </label>
             <input
@@ -134,7 +134,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
             />
           </div>
           <div>
-            <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+            <label style={{ fontSize: 10, color: 'var(--tx-dim)', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
               Project Number
             </label>
             <input
@@ -145,7 +145,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: 10, color: 'var(--tx-dim)', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                 Start Date *
               </label>
               <DatePicker
@@ -155,7 +155,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
               />
             </div>
             <div>
-              <label style={{ fontSize: 10, color: '#444', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: 10, color: 'var(--tx-dim)', display: 'block', marginBottom: 5, letterSpacing: '.08em', textTransform: 'uppercase' }}>
                 End Date *
               </label>
               <DatePicker
@@ -170,18 +170,18 @@ export default function ProjectForm({ inventory, categories, initialData, projec
 
       {/* Kit selector */}
       <div className="ca" style={{ marginBottom: 14 }}>
-        <div style={{ padding: '13px 16px', borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '13px 16px', borderBottom: '1px solid var(--bd-cat)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase' }}>Select Kit</span>
+            <span style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Select Kit</span>
             {(!form.startDate || !form.endDate) && (
-              <span style={{ fontSize: 11, color: '#444', fontStyle: 'italic' }}>Set dates to see live availability</span>
+              <span style={{ fontSize: 11, color: 'var(--tx-dim)', fontStyle: 'italic' }}>Set dates to see live availability</span>
             )}
           </div>
-          <span style={{ fontSize: 11, color: formKit.length ? '#e8b842' : '#444' }}>{formKit.length} selected</span>
+          <span style={{ fontSize: 11, color: formKit.length ? 'var(--accent)' : 'var(--tx-dim)' }}>{formKit.length} selected</span>
         </div>
 
         {/* Category tabs */}
-        <div style={{ padding: '7px 10px', borderBottom: '1px solid #141414', display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <div style={{ padding: '7px 10px', borderBottom: '1px solid var(--bd-sub)', display: 'flex', flexWrap: 'wrap', gap: 2 }}>
           <button className={`ct${activeCat === null ? ' on' : ''}`} onClick={() => setActiveCat(null)}>All</button>
           {categories.map(c => (
             <button key={c} className={`ct${activeCat === c ? ' on' : ''}`} onClick={() => setActiveCat(activeCat === c ? null : c)}>{c}</button>
@@ -189,7 +189,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
         </div>
 
         {/* Search */}
-        <div style={{ padding: '8px 14px', borderBottom: '1px solid #141414' }}>
+        <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--bd-sub)' }}>
           <div className="sw">
             <span>⌕</span>
             <input className="fi" placeholder="Search kit or serial number..." value={kitSearch} onChange={e => setKitSearch(e.target.value)} />
@@ -211,10 +211,10 @@ export default function ProjectForm({ inventory, categories, initialData, projec
                     {/* Item name header row (non-interactive) */}
                     <div style={{
                       padding: '8px 14px 4px',
-                      background: '#0a0a0a',
-                      borderBottom: '1px solid #131313',
+                      background: 'var(--bg-sub)',
+                      borderBottom: '1px solid var(--bd-sub)',
                       fontSize: 12,
-                      color: '#888',
+                      color: 'var(--tx-sub)',
                     }}>
                       {name}
                     </div>
@@ -241,11 +241,11 @@ export default function ProjectForm({ inventory, categories, initialData, projec
                             {sel && <span style={{ fontSize: 11, color: '#090909', fontWeight: 700 }}>✓</span>}
                           </div>
                           <div style={{ flex: 1, textAlign: 'left' }}>
-                            <span style={{ fontSize: 11, color: locked ? '#3a3a3a' : '#777', letterSpacing: '.04em' }}>
+                            <span style={{ fontSize: 11, color: locked ? 'var(--tx-vdim)' : 'var(--tx-muted)', letterSpacing: '.04em' }}>
                               ({unit.unit_number})
                             </span>
                             {unit.serial_number && (
-                              <span style={{ fontSize: 11, color: locked ? '#2a2a2a' : '#555', marginLeft: 10, letterSpacing: '.04em' }}>
+                              <span style={{ fontSize: 11, color: locked ? 'var(--tx-vdim)' : 'var(--tx-muted)', marginLeft: 10, letterSpacing: '.04em' }}>
                                 {unit.serial_number}
                               </span>
                             )}
@@ -270,7 +270,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Booking summary */}
       {formKit.length > 0 && (
         <div className="ca" style={{ padding: '14px 18px', marginBottom: 14, borderColor: '#1c1500' }}>
-          <div style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+          <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
             Booking Summary
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>

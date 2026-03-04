@@ -83,38 +83,38 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
         onClick={() => setOpen(o => !o)}
         style={{ textAlign: 'left', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
-        <span style={{ color: displayValue ? '#d8d3c9' : '#444' }}>
+        <span style={{ color: displayValue ? 'var(--tx)' : 'var(--tx-dim)' }}>
           {displayValue ?? placeholder}
         </span>
-        <span style={{ color: '#555', fontSize: 10, marginLeft: 8, flexShrink: 0 }}>▾</span>
+        <span style={{ color: 'var(--tx-muted)', fontSize: 10, marginLeft: 8, flexShrink: 0 }}>▾</span>
       </button>
 
       {/* Calendar popup */}
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 200,
-          background: '#111', border: '1px solid #2a2a2a', borderRadius: 3,
-          padding: 12, width: 256, boxShadow: '0 8px 32px rgba(0,0,0,.7)',
+          background: 'var(--bg-dp)', border: '1px solid var(--bd-dp)', borderRadius: 3,
+          padding: 12, width: 256, boxShadow: 'var(--dp-shadow)',
         }}>
           {/* Month / year navigation */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <button
               type="button" onClick={prevMonth}
-              style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 20, padding: '0 8px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', color: 'var(--tx-muted)', cursor: 'pointer', fontSize: 20, padding: '0 8px', lineHeight: 1 }}
             >‹</button>
-            <span style={{ fontSize: 12, color: '#d8d3c9', letterSpacing: '.04em', fontWeight: 500 }}>
+            <span style={{ fontSize: 12, color: 'var(--tx)', letterSpacing: '.04em', fontWeight: 500 }}>
               {MONTHS[viewMonth]} {viewYear}
             </span>
             <button
               type="button" onClick={nextMonth}
-              style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 20, padding: '0 8px', lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', color: 'var(--tx-muted)', cursor: 'pointer', fontSize: 20, padding: '0 8px', lineHeight: 1 }}
             >›</button>
           </div>
 
           {/* Day-of-week headers */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 4 }}>
             {DAY_LABELS.map(d => (
-              <div key={d} style={{ textAlign: 'center', fontSize: 10, color: '#3a3a3a', padding: '2px 0', letterSpacing: '.04em' }}>
+              <div key={d} style={{ textAlign: 'center', fontSize: 10, color: 'var(--tx-vdim)', padding: '2px 0', letterSpacing: '.04em' }}>
                 {d}
               </div>
             ))}
@@ -135,9 +135,9 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
                   onClick={() => selectDay(day)}
                   className="dp-day"
                   style={{
-                    background:  isSel ? '#e8b842' : isToday ? '#1a1500' : 'transparent',
-                    border:      isToday && !isSel ? '1px solid #3a3000' : '1px solid transparent',
-                    color:       isSel ? '#090909' : isToday ? '#e8b842' : '#b0aba2',
+                    background:  isSel ? 'var(--accent)' : isToday ? 'var(--dp-today-bg)' : 'transparent',
+                    border:      isToday && !isSel ? '1px solid var(--dp-today-bd)' : '1px solid transparent',
+                    color:       isSel ? '#090909' : isToday ? 'var(--accent)' : 'var(--dp-day)',
                     borderRadius: 2,
                     padding:     '5px 2px',
                     fontSize:    12,

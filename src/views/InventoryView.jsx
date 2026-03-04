@@ -97,14 +97,14 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>MANAGE INVENTORY</h1>
-            <p style={{ color: '#444', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
+            <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
           </div>
           <button className="by" onClick={() => { setIsManaging(false); setConfirmDeleteId(null); }}>Done Editing</button>
         </div>
 
         {/* Add Item form */}
         <div className="ca" style={{ padding: '16px 18px', marginBottom: 14 }}>
-          <div style={{ fontSize: 10, color: '#e8b842', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>
             Add New Item
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -142,7 +142,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
             />
             {/* Count (number of units to create) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-              <span style={{ fontSize: 10, color: '#555', letterSpacing: '.08em', textTransform: 'uppercase' }}>Units</span>
+              <span style={{ fontSize: 10, color: 'var(--tx-muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>Units</span>
               <input
                 type="number" className="qb" min={1}
                 value={addForm.count}
@@ -165,9 +165,9 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                   {/* Name group header */}
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '6px 14px 4px', background: '#0a0a0a', borderBottom: '1px solid #131313',
+                    padding: '6px 14px 4px', background: 'var(--bg-sub)', borderBottom: '1px solid var(--bd-sub)',
                   }}>
-                    <span style={{ fontSize: 11, color: '#666', letterSpacing: '.04em' }}>{name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--tx-muted)', letterSpacing: '.04em' }}>{name}</span>
                     <button
                       className="bo"
                       style={{ padding: '3px 10px', fontSize: 10 }}
@@ -184,10 +184,10 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                   {units.map(unit => (
                     <div key={unit.id} style={{
                       display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px 14px', borderBottom: '1px solid #141414',
+                      padding: '8px 14px', borderBottom: '1px solid var(--bd-sub)',
                     }}>
                       {/* Unit number badge */}
-                      <span style={{ fontSize: 10, color: '#444', letterSpacing: '.06em', flexShrink: 0, minWidth: 28 }}>
+                      <span style={{ fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.06em', flexShrink: 0, minWidth: 28 }}>
                         #{unit.unit_number}
                       </span>
                       {/* Name */}
@@ -200,7 +200,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                       {/* Serial number */}
                       <input
                         className="fi"
-                        style={{ flex: 1, color: '#666' }}
+                        style={{ flex: 1, color: 'var(--tx-muted)' }}
                         placeholder="Serial number (optional)"
                         value={unit.serial_number ?? ''}
                         onChange={e => onUpdate(unit.id, { serial_number: e.target.value || null })}
@@ -222,7 +222,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
             </div>
           ))}
           {inventory.length === 0 && (
-            <div style={{ padding: '40px 0', textAlign: 'center', color: '#3a3a3a', fontSize: 12 }}>
+            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--tx-vdim)', fontSize: 12 }}>
               No items yet. Add one above.
             </div>
           )}
@@ -237,12 +237,12 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>KIT INVENTORY</h1>
-          <p style={{ color: '#444', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
+          <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <button className="bo" onClick={startManaging}>Manage Inventory</button>
           <div>
-            <label style={{ display: 'block', fontSize: 10, color: '#444', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
+            <label style={{ display: 'block', fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
               Availability as of
             </label>
             <DatePicker value={checkDate} onChange={setCheckDate} />
@@ -269,9 +269,9 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
 
           return (
             <div key={cat} className="ca">
-              <div style={{ padding: '10px 14px', borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, letterSpacing: '.1em', color: '#e8b842', textTransform: 'uppercase' }}>{cat}</span>
-                <span style={{ fontSize: 10, color: '#2e2e2e' }}>({Object.keys(byName).length})</span>
+              <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--bd-cat)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 10, letterSpacing: '.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>{cat}</span>
+                <span style={{ fontSize: 10, color: 'var(--tx-vdim)' }}>({Object.keys(byName).length})</span>
               </div>
               {Object.entries(byName).map(([name, nameUnits]) => {
                 const total  = nameUnits.length;
@@ -280,8 +280,8 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                 const allOut = free === 0;
                 const someOut = free < total;
                 return (
-                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: '1px solid #111' }}>
-                    <span style={{ fontSize: 12, color: allOut ? '#3a3a3a' : '#c9c4ba' }}>{name}</span>
+                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: '1px solid var(--bd-sub)' }}>
+                    <span style={{ fontSize: 12, color: allOut ? 'var(--tx-vdim)' : 'var(--tx)' }}>{name}</span>
                     <div style={{ marginLeft: 8, flexShrink: 0 }}>
                       {allOut
                         ? <Pill variant="red">0/{total}</Pill>
