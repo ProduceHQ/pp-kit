@@ -275,7 +275,8 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
               </div>
               {Object.entries(byName).map(([name, nameUnits]) => {
                 const total  = nameUnits.length;
-                const free   = nameUnits.filter(u => !bookedSet.has(u.id)).length;
+                // A unit is unavailable if it's booked OR flagged damaged/missing
+                const free   = nameUnits.filter(u => !bookedSet.has(u.id) && (!u.status || u.status === 'available')).length;
                 const allOut = free === 0;
                 const someOut = free < total;
                 return (

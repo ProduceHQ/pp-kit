@@ -5,6 +5,7 @@ import RegionSelect from './components/RegionSelect';
 import InventoryView from './views/InventoryView';
 import ProjectsView  from './views/ProjectsView';
 import ProjectForm   from './views/ProjectForm';
+import IssuesView    from './views/IssuesView';
 
 const GLOBAL_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap');
@@ -79,6 +80,11 @@ export default function App() {
   // Derive categories dynamically from current inventory.
   const categories = useMemo(
     () => [...new Set(inventory.map(item => item.category))],
+    [inventory],
+  );
+
+  const issueCount = useMemo(
+    () => inventory.filter(u => u.status && u.status !== 'available').length,
     [inventory],
   );
 
@@ -168,6 +174,51 @@ export default function App() {
     }
   };
 
+  // ── Kit lifecycle ──────────────────────────────────────────────────────────
+  const handleKitPacked = async (projectId) => {
+    const packedAt = new Date().toISOString();
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, packedAt } : p));
+    try {
+      await api.updateProject(projectId, { packed_at: packedAt });
+    } catch (e) {
+      alert('Failed to update project: ' + e.message);
+      api.getProjects(region).then(setProjects).catch(() => {});
+    }
+  };
+
+  const handleKitReturned = async (projectId, returnItems) => {
+    const returnedAt = new Date().toISOString();
+    // Optimistically update project
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, returnedAt } : p));
+    // Optimistically flag damaged/missing units
+    const updates = returnItems.filter(r => r.status !== 'returned');
+    setInventory(prev => prev.map(u => {
+      const match = updates.find(r => r.unitId === u.id);
+      return match ? { ...u, status: match.status } : u;
+    }));
+    try {
+      await api.updateProject(projectId, { returned_at: returnedAt });
+      await Promise.all(
+        updates.map(r => api.updateInventoryItem(r.unitId, { status: r.status }))
+      );
+    } catch (e) {
+      alert('Failed to record return: ' + e.message);
+      Promise.all([api.getProjects(region), api.getInventory(region)])
+        .then(([proj, inv]) => { setProjects(proj); setInventory(inv); })
+        .catch(() => {});
+    }
+  };
+
+  const handleResolveIssue = async (unitId) => {
+    setInventory(prev => prev.map(u => u.id === unitId ? { ...u, status: 'available' } : u));
+    try {
+      await api.updateInventoryItem(unitId, { status: 'available' });
+    } catch (e) {
+      alert('Failed to resolve issue: ' + e.message);
+      api.getInventory(region).then(setInventory).catch(() => {});
+    }
+  };
+
   const handleInventoryDelete = async (id) => {
     // Optimistic remove
     setInventory(prev => prev.filter(item => item.id !== id));
@@ -207,6 +258,24 @@ export default function App() {
                   {label}
                 </button>
               ))}
+              <button
+                className={`nb${view === 'issues' ? ' on' : ''}`}
+                onClick={() => setView('issues')}
+                aria-current={view === 'issues' ? 'page' : undefined}
+                style={{ position: 'relative' }}
+              >
+                Issues
+                {issueCount > 0 && (
+                  <span style={{
+                    position: 'absolute', top: 10, right: 6,
+                    background: '#c44', color: '#fff',
+                    fontSize: 9, fontWeight: 700, borderRadius: 10,
+                    padding: '1px 5px', lineHeight: 1.4,
+                  }}>
+                    {issueCount}
+                  </span>
+                )}
+              </button>
             </nav>
           </header>
 
@@ -247,6 +316,14 @@ export default function App() {
                     onNew={openNew}
                     onEdit={openEdit}
                     onDelete={handleProjectDelete}
+                    onKitPacked={handleKitPacked}
+                    onKitReturned={handleKitReturned}
+                  />
+                )}
+                {view === 'issues' && (
+                  <IssuesView
+                    inventory={inventory}
+                    onResolve={handleResolveIssue}
                   />
                 )}
                 {view === 'form' && (

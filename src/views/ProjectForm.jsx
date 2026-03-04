@@ -221,8 +221,10 @@ export default function ProjectForm({ inventory, categories, initialData, projec
 
                     {/* Individual unit sub-rows */}
                     {nameUnits.map(unit => {
-                      const sel    = formKit.some(k => k.itemId === unit.id);
-                      const locked = bookedSet.has(unit.id) && !sel;
+                      const sel     = formKit.some(k => k.itemId === unit.id);
+                      const flagged = unit.status && unit.status !== 'available';
+                      // Locked if: booked by another project, OR flagged damaged/missing (and not already in this form's kit)
+                      const locked  = (bookedSet.has(unit.id) && !sel) || (flagged && !sel);
 
                       return (
                         <button
@@ -252,7 +254,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
                             fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0,
                             color: locked ? '#4a1515' : '#1a5a30',
                           }}>
-                            {locked ? 'BOOKED' : 'FREE'}
+                            {flagged && !sel ? unit.status.toUpperCase() : locked ? 'BOOKED' : 'FREE'}
                           </span>
                         </button>
                       );

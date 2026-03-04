@@ -4,13 +4,15 @@ import { supabase } from './supabase';
 
 function mapProject(row) {
   return {
-    id:        row.id,
-    name:      row.name,
-    number:    row.number ?? '',
-    startDate: row.start_date,
-    endDate:   row.end_date,
-    region:    row.region,
-    kit:       (row.project_kit ?? []).map(k => ({ itemId: k.item_id })),
+    id:         row.id,
+    name:       row.name,
+    number:     row.number ?? '',
+    startDate:  row.start_date,
+    endDate:    row.end_date,
+    region:     row.region,
+    packedAt:   row.packed_at ?? null,
+    returnedAt: row.returned_at ?? null,
+    kit:        (row.project_kit ?? []).map(k => ({ itemId: k.item_id })),
   };
 }
 
@@ -121,6 +123,14 @@ export async function saveProject(formData, existingId = null) {
   }
 
   return projectId;
+}
+
+export async function updateProject(id, updates) {
+  const { error } = await supabase
+    .from('projects')
+    .update(updates)
+    .eq('id', id);
+  if (error) throw error;
 }
 
 export async function deleteProject(id) {
