@@ -25,7 +25,6 @@ function hasIssue(kit, inventory) {
 export default function ProjectsView({ inventory, projects, onNew, onEdit, onDelete, onKitPacked, onKitReturned }) {
   const today = new Date().toISOString().split('T')[0];
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [expandedId, setExpandedId]           = useState(null);
   const [returnModalId, setReturnModalId]     = useState(null);
   const [showPast, setShowPast]               = useState(false);
 
@@ -85,7 +84,6 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
       <div style={{ display: 'grid', gap: 10 }}>
         {visibleProjects.map(project => {
           const status       = projStatus(project, today);
-          const isExpanded   = expandedId === project.id;
           const isConfirming = confirmDeleteId === project.id;
           const kitGroups    = buildKitGroups(project.kit, inventory);
           const allCats      = Object.keys(kitGroups);
@@ -95,11 +93,6 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
           const isPacked     = !!project.packedAt;
           const canPack      = !isPacked && !isReturned && (status.label === 'Upcoming' || status.label === 'Active');
           const canReturn    = isPacked && !isReturned;
-
-          // Collapsed preview: first 4 units
-          const flatUnits   = Object.values(kitGroups).flat();
-          const previewUnits = flatUnits.slice(0, 4);
-          const hiddenCount  = flatUnits.length - 4;
 
           return (
             <div key={project.id} className="pc" style={{ opacity: isReturned ? 0.7 : 1 }}>
@@ -121,58 +114,32 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                     <span>{totalUnits} unit{totalUnits !== 1 ? 's' : ''}</span>
                   </div>
 
-                  {/* Kit display */}
-                  {!isExpanded ? (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                      {previewUnits.map(unit => (
-                        <span key={unit.id} className="tg"
-                          style={ unit.status && unit.status !== 'available' ? { borderColor: '#4a1515', color: '#c44' } : {} }
-                        >
-                          {unitLabel(unit, inventory)}
-                        </span>
-                      ))}
-                      {hiddenCount > 0 && (
-                        <button
-                          onClick={() => setExpandedId(project.id)}
-                          style={{ background: 'none', border: 'none', color: '#e8b842', fontSize: 11, cursor: 'pointer', padding: '3px 6px' }}
-                        >
-                          +{hiddenCount} more
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: 4 }}>
-                      {allCats.map(cat => (
-                        <div key={cat} style={{ marginBottom: 10 }}>
-                          <div style={{ fontSize: 9, color: '#e8b842', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
-                            {cat}
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                            {kitGroups[cat].map(unit => {
-                              const flagged = unit.status && unit.status !== 'available';
-                              return (
-                                <div key={unit.id} style={{ fontSize: 11, color: flagged ? '#c44' : '#888', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <span>{unitLabel(unit, inventory)}</span>
-                                  {unit.serial_number && (
-                                    <span style={{ color: '#444', fontSize: 10, letterSpacing: '.04em' }}>
-                                      {unit.serial_number}
-                                    </span>
-                                  )}
-                                  {flagged && <Pill variant={unit.status === 'missing' ? 'red' : 'amber'}>{unit.status}</Pill>}
-                                </div>
-                              );
-                            })}
-                          </div>
+                  {/* Kit display — always expanded */}
+                  <div style={{ marginTop: 4 }}>
+                    {allCats.map(cat => (
+                      <div key={cat} style={{ marginBottom: 10 }}>
+                        <div style={{ fontSize: 9, color: '#e8b842', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
+                          {cat}
                         </div>
-                      ))}
-                      <button
-                        onClick={() => setExpandedId(null)}
-                        style={{ background: 'none', border: 'none', color: '#555', fontSize: 11, cursor: 'pointer', padding: '3px 0', marginTop: 2 }}
-                      >
-                        Show less ▲
-                      </button>
-                    </div>
-                  )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          {kitGroups[cat].map(unit => {
+                            const flagged = unit.status && unit.status !== 'available';
+                            return (
+                              <div key={unit.id} style={{ fontSize: 11, color: flagged ? '#c44' : '#888', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span>{unitLabel(unit, inventory)}</span>
+                                {unit.serial_number && (
+                                  <span style={{ color: '#444', fontSize: 10, letterSpacing: '.04em' }}>
+                                    {unit.serial_number}
+                                  </span>
+                                )}
+                                {flagged && <Pill variant={unit.status === 'missing' ? 'red' : 'amber'}>{unit.status}</Pill>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Actions */}

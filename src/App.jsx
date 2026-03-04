@@ -62,7 +62,7 @@ const GLOBAL_STYLES = `
   .tg{background:#161616;border:1px solid #222;border-radius:2px;padding:3px 10px;font-size:11px;color:#888}
 
   /* Category divider */
-  .dl{padding:7px 14px;background:#0c0c0c;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#555;border-bottom:1px solid #161616;border-top:1px solid #161616}
+  .dl{padding:7px 14px;background:#0c0c0c;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#e8b842;border-bottom:1px solid #161616;border-top:1px solid #161616}
 
   /* DatePicker day hover */
   .dp-day:not([data-selected="true"]):hover{background:#1e1e1e !important}
