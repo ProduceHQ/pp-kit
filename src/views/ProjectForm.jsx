@@ -1,18 +1,18 @@
 import { useState, useMemo } from 'react';
-import { buildBookedMap } from '../utils';
+import { buildBookedMap, unitLabel } from '../utils';
 import DatePicker from '../components/DatePicker';
 
-export default function ProjectForm({ inventory, categories, initialData, projects, editId, onSave, onBack }) {
+export default function ProjectForm({ inventory, categories, initialData, projects, editId, region, onSave, onBack }) {
   const [form, setForm] = useState({
     name:      initialData?.name      ?? '',
     number:    initialData?.number    ?? '',
     startDate: initialData?.startDate ?? '',
     endDate:   initialData?.endDate   ?? '',
   });
-  const [formKit, setFormKit]           = useState(initialData?.kit.map(k => ({ ...k })) ?? []);
-  const [error, setError]               = useState('');
-  const [kitSearch, setKitSearch]       = useState('');
-  const [activeCat, setActiveCat]       = useState(null);
+  const [formKit, setFormKit]                   = useState(initialData?.kit.map(k => ({ ...k })) ?? []);
+  const [error, setError]                       = useState('');
+  const [kitSearch, setKitSearch]               = useState('');
+  const [activeCat, setActiveCat]               = useState(null);
   const [showLeaveWarning, setShowLeaveWarning] = useState(false);
 
   // Detect unsaved changes to guard the Back/Cancel actions.
@@ -31,19 +31,24 @@ export default function ProjectForm({ inventory, categories, initialData, projec
     );
   }, [form, formKit, initialData]);
 
-  // Single memoized availability pass; re-runs only when dates / bookings change.
-  const bookedMap = useMemo(
+  // Set of booked unit IDs over the chosen date range (excluding this project when editing).
+  const bookedSet = useMemo(
     () => buildBookedMap(inventory, form.startDate, form.endDate, projects, editId),
     [inventory, form.startDate, form.endDate, projects, editId],
   );
 
+  // Group units by category, filtered by search (name or serial number).
   const kitGroups = useMemo(() => {
-    const filtered = inventory.filter(item =>
-      item.name.toLowerCase().includes(kitSearch.toLowerCase())
-    );
+    const filtered = inventory.filter(unit => {
+      const q = kitSearch.toLowerCase();
+      return (
+        unit.name.toLowerCase().includes(q) ||
+        (unit.serial_number ?? '').toLowerCase().includes(q)
+      );
+    });
     return categories
-      .map(cat => ({ cat, items: filtered.filter(item => item.category === cat) }))
-      .filter(group => group.items.length > 0);
+      .map(cat => ({ cat, units: filtered.filter(u => u.category === cat) }))
+      .filter(group => group.units.length > 0);
   }, [inventory, categories, kitSearch]);
 
   const updateField = (key, value) => {
@@ -51,16 +56,12 @@ export default function ProjectForm({ inventory, categories, initialData, projec
     setError('');
   };
 
-  const toggleItem = (itemId) => {
+  const toggleItem = (unitId) => {
     setFormKit(prev =>
-      prev.find(k => k.itemId === itemId)
-        ? prev.filter(k => k.itemId !== itemId)
-        : [...prev, { itemId, qty: 1 }]
+      prev.find(k => k.itemId === unitId)
+        ? prev.filter(k => k.itemId !== unitId)
+        : [...prev, { itemId: unitId }]
     );
-  };
-
-  const updateQty = (itemId, qty) => {
-    setFormKit(prev => prev.map(k => k.itemId === itemId ? { ...k, qty } : k));
   };
 
   const handleSave = () => {
@@ -191,59 +192,49 @@ export default function ProjectForm({ inventory, categories, initialData, projec
         <div style={{ padding: '8px 14px', borderBottom: '1px solid #141414' }}>
           <div className="sw">
             <span>⌕</span>
-            <input className="fi" placeholder="Search kit..." value={kitSearch} onChange={e => setKitSearch(e.target.value)} />
+            <input className="fi" placeholder="Search kit or serial number..." value={kitSearch} onChange={e => setKitSearch(e.target.value)} />
           </div>
         </div>
 
-        {/* Item rows — buttons for keyboard accessibility */}
+        {/* Unit rows */}
         <div style={{ maxHeight: 450, overflowY: 'auto' }} role="list">
-          {kitGroups.filter(group => activeCat === null || group.cat === activeCat).map(({ cat, items }) => (
+          {kitGroups.filter(group => activeCat === null || group.cat === activeCat).map(({ cat, units }) => (
             <div key={cat}>
               <div className="dl">{cat}</div>
-              {items.map(item => {
-                const booked = bookedMap[item.id] ?? 0;
-                const avail  = item.qty - booked;
-                const sel    = formKit.find(k => k.itemId === item.id);
-                const locked = avail <= 0 && !sel;
+              {units.map(unit => {
+                const label  = unitLabel(unit, inventory);
+                const sel    = formKit.some(k => k.itemId === unit.id);
+                // Locked = booked by another project AND not currently in this form's kit
+                const locked = bookedSet.has(unit.id) && !sel;
 
                 return (
                   <button
-                    key={item.id}
+                    key={unit.id}
                     role="listitem"
                     className={`ro${sel ? ' sl' : ''}`}
-                    onClick={() => { if (!locked) toggleItem(item.id); }}
+                    onClick={() => { if (!locked) toggleItem(unit.id); }}
                     disabled={locked}
-                    aria-pressed={!!sel}
-                    aria-label={`${item.name}. ${locked ? 'Not available' : `${avail} available`}${sel ? ', selected' : ''}`}
+                    aria-pressed={sel}
+                    aria-label={`${label}. ${locked ? 'Not available' : 'Available'}${sel ? ', selected' : ''}`}
                   >
                     <div className={`ck${sel ? ' on' : ''}`} aria-hidden="true">
                       {sel && <span style={{ fontSize: 11, color: '#090909', fontWeight: 700 }}>✓</span>}
                     </div>
-                    <span style={{ flex: 1, fontSize: 12, color: locked ? '#333' : '#c9c4ba', textAlign: 'left' }}>
-                      {item.name}
-                    </span>
-                    {sel && (
-                      <div
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, marginRight: 14 }}
-                        onClick={e => e.stopPropagation()}
-                      >
-                        <span style={{ fontSize: 11, color: '#444' }}>Qty</span>
-                        <input
-                          className="qb"
-                          type="number"
-                          min={1}
-                          max={avail}
-                          value={sel.qty}
-                          aria-label={`Quantity for ${item.name}`}
-                          onChange={e => updateQty(item.id, Math.max(1, Math.min(avail, parseInt(e.target.value) || 1)))}
-                        />
+                    <div style={{ flex: 1, textAlign: 'left' }}>
+                      <div style={{ fontSize: 12, color: locked ? '#333' : '#c9c4ba' }}>
+                        {label}
                       </div>
-                    )}
+                      {unit.serial_number && (
+                        <div style={{ fontSize: 10, color: locked ? '#2a2a2a' : '#555', marginTop: 2, letterSpacing: '.04em' }}>
+                          {unit.serial_number}
+                        </div>
+                      )}
+                    </div>
                     <span style={{
-                      fontSize: 11, minWidth: 68, textAlign: 'right',
-                      color: locked ? '#4a1515' : avail < item.qty ? '#8a6000' : '#1a5a30',
+                      fontSize: 11, minWidth: 60, textAlign: 'right', flexShrink: 0,
+                      color: locked ? '#4a1515' : '#1a5a30',
                     }}>
-                      {locked ? 'BOOKED' : `${avail} avail`}
+                      {locked ? 'BOOKED' : 'FREE'}
                     </span>
                   </button>
                 );
@@ -261,13 +252,13 @@ export default function ProjectForm({ inventory, categories, initialData, projec
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {formKit.map(k => {
-              const item = inventory.find(i => i.id === k.itemId);
-              return item ? (
+              const unit = inventory.find(u => u.id === k.itemId);
+              return unit ? (
                 <span key={k.itemId} style={{
                   background: '#130f00', border: '1px solid #2a2000',
                   borderRadius: 2, padding: '4px 12px', fontSize: 11, color: '#c0a040',
                 }}>
-                  {item.name}{k.qty > 1 ? ` ×${k.qty}` : ''}
+                  {unitLabel(unit, inventory)}
                 </span>
               ) : null;
             })}

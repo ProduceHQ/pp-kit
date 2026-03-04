@@ -9,28 +9,40 @@ function mapProject(row) {
     number:    row.number ?? '',
     startDate: row.start_date,
     endDate:   row.end_date,
-    kit:       (row.project_kit ?? []).map(k => ({ itemId: k.item_id, qty: k.qty })),
+    region:    row.region,
+    kit:       (row.project_kit ?? []).map(k => ({ itemId: k.item_id })),
   };
 }
 
 // ─── Inventory ────────────────────────────────────────────────────────────────
 
-export async function getInventory() {
+export async function getInventory(region) {
   const { data, error } = await supabase
     .from('inventory')
     .select('*')
+    .eq('region', region)
     .order('category')
-    .order('name');
+    .order('name')
+    .order('unit_number');
   if (error) throw error;
   return data;
 }
 
-export async function addInventoryItem({ category, name, qty }) {
+export async function addInventoryItem({ category, name, unit_number, serial_number = null, region }) {
   const { data, error } = await supabase
     .from('inventory')
-    .insert({ category, name, qty })
+    .insert({ category, name, unit_number, serial_number, region })
     .select()
     .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function addInventoryUnits(units) {
+  const { data, error } = await supabase
+    .from('inventory')
+    .insert(units)
+    .select();
   if (error) throw error;
   return data;
 }
@@ -53,10 +65,11 @@ export async function deleteInventoryItem(id) {
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
-export async function getProjects() {
+export async function getProjects(region) {
   const { data, error } = await supabase
     .from('projects')
     .select('*, project_kit(*)')
+    .eq('region', region)
     .order('start_date');
   if (error) throw error;
   return data.map(mapProject);
@@ -69,6 +82,7 @@ export async function saveProject(formData, existingId = null) {
     number:     rest.number ?? '',
     start_date: rest.startDate,
     end_date:   rest.endDate,
+    region:     rest.region,
   };
 
   let projectId = existingId;
@@ -98,11 +112,11 @@ export async function saveProject(formData, existingId = null) {
     projectId = data.id;
   }
 
-  // Insert kit rows (if any)
+  // Insert kit rows (one per unit, qty always 1)
   if (kit && kit.length > 0) {
     const { error } = await supabase
       .from('project_kit')
-      .insert(kit.map(k => ({ project_id: projectId, item_id: k.itemId, qty: k.qty })));
+      .insert(kit.map(k => ({ project_id: projectId, item_id: k.itemId, qty: 1 })));
     if (error) throw error;
   }
 

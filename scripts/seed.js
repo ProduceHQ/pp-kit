@@ -1,12 +1,13 @@
 /**
  * One-time seed script — populates the Supabase inventory table with
- * all 74 default kit items from constants.js.
+ * per-unit rows for the London office kit.
  *
  * Prerequisites:
  *   1. Create a .env.local file in the project root with:
  *        SUPABASE_URL=https://your-project-ref.supabase.co
  *        SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
- *   2. Make sure the database schema has been run (see README / DEPLOY.md)
+ *   2. Run the DB migration SQL (see DEPLOY.md) to add region/unit_number/serial_number columns
+ *   3. Delete any existing inventory rows in Supabase first
  *
  * Run once with:
  *   node scripts/seed.js
@@ -45,7 +46,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
-// ── Default inventory (copied from constants.js, id field stripped) ──────────
+// ── Default inventory (qty = number of physical units to create) ─────────────
 const DEFAULT_INVENTORY = [
   { category: "Camera",     name: "RED Scarlet W",                 qty: 1 },
   { category: "Camera",     name: "RED Dragon-X",                  qty: 1 },
@@ -124,11 +125,28 @@ const DEFAULT_INVENTORY = [
   { category: "Support",    name: "Teleprompter",                   qty: 1 },
 ];
 
+/**
+ * Expands a qty-based inventory list into one row per physical unit.
+ * Items with qty=1 get unit_number=1; items with qty=N get unit_numbers 1..N.
+ */
+function expand(items, region) {
+  return items.flatMap(({ category, name, qty }) =>
+    Array.from({ length: qty }, (_, i) => ({
+      category,
+      name,
+      region,
+      unit_number: i + 1,
+      serial_number: null,
+    }))
+  );
+}
+
 // ── Seed ─────────────────────────────────────────────────────────────────────
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function seed() {
-  console.log(`Seeding ${DEFAULT_INVENTORY.length} inventory items…`);
+  const rows = expand(DEFAULT_INVENTORY, 'London');
+  console.log(`Seeding ${rows.length} unit rows for London…`);
 
   // Check if inventory already has data
   const { count } = await supabase
@@ -137,18 +155,19 @@ async function seed() {
 
   if (count > 0) {
     console.log(`⚠  inventory table already has ${count} rows. Skipping seed.`);
-    console.log('   Delete existing rows in Supabase first if you want to re-seed.');
+    console.log('   Run the DELETE FROM inventory SQL in Supabase first if you want to re-seed.');
     process.exit(0);
   }
 
-  const { error } = await supabase.from('inventory').insert(DEFAULT_INVENTORY);
+  const { error } = await supabase.from('inventory').insert(rows);
 
   if (error) {
     console.error('✗  Seed failed:', error.message);
     process.exit(1);
   }
 
-  console.log(`✓  Seeded ${DEFAULT_INVENTORY.length} items successfully.`);
+  console.log(`✓  Seeded ${rows.length} unit rows successfully (London office).`);
+  console.log('   Dubai inventory can be added via Manage Inventory in the app.');
 }
 
 seed();

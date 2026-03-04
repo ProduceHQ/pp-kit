@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { DEFAULT_INVENTORY } from './constants';
 import * as api from './lib/api';
 import AccessGate from './components/AccessGate';
+import RegionSelect from './components/RegionSelect';
 import InventoryView from './views/InventoryView';
 import ProjectsView  from './views/ProjectsView';
 import ProjectForm   from './views/ProjectForm';
@@ -68,11 +68,12 @@ const GLOBAL_STYLES = `
 `;
 
 export default function App() {
+  const [region, setRegion]           = useState(null);
   const [view, setView]               = useState('inventory');
   const [projects, setProjects]       = useState([]);
   const [inventory, setInventory]     = useState([]);
   const [editProject, setEditProject] = useState(null);
-  const [loading, setLoading]         = useState(true);
+  const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState(null);
 
   // Derive categories dynamically from current inventory.
@@ -81,12 +82,14 @@ export default function App() {
     [inventory],
   );
 
-  // ── Initial data load ──────────────────────────────────────────────────────
+  // ── Initial data load (runs when region is set) ────────────────────────────
   useEffect(() => {
+    if (!region) return;
     async function load() {
       try {
         setLoading(true);
-        const [inv, proj] = await Promise.all([api.getInventory(), api.getProjects()]);
+        setError(null);
+        const [inv, proj] = await Promise.all([api.getInventory(region), api.getProjects(region)]);
         setInventory(inv);
         setProjects(proj);
       } catch (e) {
@@ -96,7 +99,7 @@ export default function App() {
       }
     }
     load();
-  }, []);
+  }, [region]);
 
   // ── Project CRUD ───────────────────────────────────────────────────────────
   const openNew  = ()        => { setEditProject(null);    setView('form'); };
@@ -104,22 +107,23 @@ export default function App() {
 
   const handleProjectSave = async (data) => {
     try {
+      const dataWithRegion = { ...data, region };
       if (editProject) {
         // Optimistic update
         setProjects(prev => prev.map(p =>
-          p.id === editProject.id ? { ...p, ...data } : p
+          p.id === editProject.id ? { ...p, ...dataWithRegion } : p
         ));
-        await api.saveProject(data, editProject.id);
+        await api.saveProject(dataWithRegion, editProject.id);
       } else {
         // Persist first to get the new UUID, then add to local state
-        const newId = await api.saveProject(data);
-        setProjects(prev => [...prev, { id: newId, ...data }]);
+        const newId = await api.saveProject(dataWithRegion);
+        setProjects(prev => [...prev, { id: newId, ...dataWithRegion }]);
       }
       setView('projects');
     } catch (e) {
       alert('Failed to save project: ' + e.message);
       // Revert: reload from server
-      api.getProjects().then(setProjects).catch(() => {});
+      api.getProjects(region).then(setProjects).catch(() => {});
     }
   };
 
@@ -130,17 +134,26 @@ export default function App() {
       await api.deleteProject(id);
     } catch (e) {
       alert('Failed to delete project: ' + e.message);
-      api.getProjects().then(setProjects).catch(() => {});
+      api.getProjects(region).then(setProjects).catch(() => {});
     }
   };
 
   // ── Inventory CRUD ─────────────────────────────────────────────────────────
   const handleInventoryAdd = async (item) => {
     try {
-      const newItem = await api.addInventoryItem(item);
+      const newItem = await api.addInventoryItem({ ...item, region });
       setInventory(prev => [...prev, newItem]);
     } catch (e) {
       alert('Failed to add item: ' + e.message);
+    }
+  };
+
+  const handleInventoryAddMultiple = async (units) => {
+    try {
+      const newItems = await api.addInventoryUnits(units.map(u => ({ ...u, region })));
+      setInventory(prev => [...prev, ...newItems]);
+    } catch (e) {
+      alert('Failed to add items: ' + e.message);
     }
   };
 
@@ -151,7 +164,7 @@ export default function App() {
       await api.updateInventoryItem(id, updates);
     } catch (e) {
       alert('Failed to update item: ' + e.message);
-      api.getInventory().then(setInventory).catch(() => {});
+      api.getInventory(region).then(setInventory).catch(() => {});
     }
   };
 
@@ -162,88 +175,97 @@ export default function App() {
       await api.deleteInventoryItem(id);
     } catch (e) {
       alert('Failed to delete item: ' + e.message);
-      api.getInventory().then(setInventory).catch(() => {});
+      api.getInventory(region).then(setInventory).catch(() => {});
     }
   };
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <AccessGate>
-      <div style={{ fontFamily: "'DM Mono',monospace", minHeight: '100vh', background: '#090909', color: '#d8d3c9' }}>
-        <style>{GLOBAL_STYLES}</style>
+      {!region ? (
+        <RegionSelect onSelect={setRegion} />
+      ) : (
+        <div style={{ fontFamily: "'DM Mono',monospace", minHeight: '100vh', background: '#090909', color: '#d8d3c9' }}>
+          <style>{GLOBAL_STYLES}</style>
 
-        <header style={{ borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <span style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: '#e8b842', letterSpacing: '.08em' }}>PERSPECTIVE PICTURES</span>
-            <span style={{ fontFamily: "'Bebas Neue'", fontSize: 18, color: '#2a2a2a', letterSpacing: '.08em' }}>/ KIT</span>
-          </div>
-          <nav style={{ display: 'flex' }} aria-label="Main navigation">
-            {[['inventory', 'Inventory'], ['projects', 'Projects']].map(([key, label]) => (
-              <button
-                key={key}
-                className={`nb${(view === key || (view === 'form' && key === 'projects')) ? ' on' : ''}`}
-                onClick={() => setView(key)}
-                aria-current={view === key ? 'page' : undefined}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-        </header>
-
-        <main style={{ padding: '26px 28px', maxWidth: 1120, margin: '0 auto' }}>
-          {loading && (
-            <div style={{ textAlign: 'center', padding: '80px 0', color: '#333', fontSize: 12, letterSpacing: '.1em' }}>
-              Loading…
+          <header style={{ borderBottom: '1px solid #181818', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: '#e8b842', letterSpacing: '.08em' }}>PERSPECTIVE PICTURES</span>
+              <span style={{ fontFamily: "'Bebas Neue'", fontSize: 18, color: '#2a2a2a', letterSpacing: '.08em' }}>/ KIT</span>
+              <span style={{ fontSize: 10, color: '#3a3a3a', letterSpacing: '.12em', textTransform: 'uppercase', marginLeft: 6 }}>
+                ● {region.toUpperCase()}
+              </span>
             </div>
-          )}
+            <nav style={{ display: 'flex' }} aria-label="Main navigation">
+              {[['inventory', 'Inventory'], ['projects', 'Projects']].map(([key, label]) => (
+                <button
+                  key={key}
+                  className={`nb${(view === key || (view === 'form' && key === 'projects')) ? ' on' : ''}`}
+                  onClick={() => setView(key)}
+                  aria-current={view === key ? 'page' : undefined}
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
+          </header>
 
-          {error && (
-            <div style={{ textAlign: 'center', padding: '80px 0' }}>
-              <div style={{ color: '#c44', fontSize: 13, marginBottom: 12 }}>Failed to connect to database</div>
-              <div style={{ color: '#444', fontSize: 11 }}>{error}</div>
-              <button className="bo" style={{ marginTop: 20 }} onClick={() => window.location.reload()}>
-                Retry
-              </button>
-            </div>
-          )}
+          <main style={{ padding: '26px 28px', maxWidth: 1120, margin: '0 auto' }}>
+            {loading && (
+              <div style={{ textAlign: 'center', padding: '80px 0', color: '#333', fontSize: 12, letterSpacing: '.1em' }}>
+                Loading…
+              </div>
+            )}
 
-          {!loading && !error && (
-            <>
-              {view === 'inventory' && (
-                <InventoryView
-                  inventory={inventory}
-                  categories={categories}
-                  projects={projects}
-                  onAdd={handleInventoryAdd}
-                  onUpdate={handleInventoryUpdate}
-                  onDelete={handleInventoryDelete}
-                />
-              )}
-              {view === 'projects' && (
-                <ProjectsView
-                  inventory={inventory}
-                  projects={projects}
-                  onNew={openNew}
-                  onEdit={openEdit}
-                  onDelete={handleProjectDelete}
-                />
-              )}
-              {view === 'form' && (
-                <ProjectForm
-                  inventory={inventory}
-                  categories={categories}
-                  initialData={editProject}
-                  projects={projects}
-                  editId={editProject?.id ?? null}
-                  onSave={handleProjectSave}
-                  onBack={() => setView('projects')}
-                />
-              )}
-            </>
-          )}
-        </main>
-      </div>
+            {error && (
+              <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                <div style={{ color: '#c44', fontSize: 13, marginBottom: 12 }}>Failed to connect to database</div>
+                <div style={{ color: '#444', fontSize: 11 }}>{error}</div>
+                <button className="bo" style={{ marginTop: 20 }} onClick={() => window.location.reload()}>
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && (
+              <>
+                {view === 'inventory' && (
+                  <InventoryView
+                    inventory={inventory}
+                    categories={categories}
+                    projects={projects}
+                    onAdd={handleInventoryAdd}
+                    onAddMultiple={handleInventoryAddMultiple}
+                    onUpdate={handleInventoryUpdate}
+                    onDelete={handleInventoryDelete}
+                  />
+                )}
+                {view === 'projects' && (
+                  <ProjectsView
+                    inventory={inventory}
+                    projects={projects}
+                    onNew={openNew}
+                    onEdit={openEdit}
+                    onDelete={handleProjectDelete}
+                  />
+                )}
+                {view === 'form' && (
+                  <ProjectForm
+                    inventory={inventory}
+                    categories={categories}
+                    initialData={editProject}
+                    projects={projects}
+                    editId={editProject?.id ?? null}
+                    region={region}
+                    onSave={handleProjectSave}
+                    onBack={() => setView('projects')}
+                  />
+                )}
+              </>
+            )}
+          </main>
+        </div>
+      )}
     </AccessGate>
   );
 }
