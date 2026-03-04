@@ -286,7 +286,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                         ? <Pill variant="red">0/{total}</Pill>
                         : someOut
                           ? <Pill variant="amber">{free}/{total}</Pill>
-                          : <Pill variant="green">{total === 1 ? 'Free' : `${free}/${total}`}</Pill>
+                          : <Pill variant="green">{free}/{total}</Pill>
                       }
                     </div>
                   </div>
