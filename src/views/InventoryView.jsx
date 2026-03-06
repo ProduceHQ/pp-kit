@@ -17,6 +17,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
   const [addForm, setAddForm]                 = useState({ category: categories[0] ?? '', name: '', count: 1, newCategoryName: '' });
   const [addIsNewCat, setAddIsNewCat]         = useState(false);
   const [addError, setAddError]               = useState('');
+  const [manageSearch, setManageSearch]       = useState('');
 
   // If the active category filter no longer exists, reset to All.
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
     setIsManaging(true);
     setConfirmDeleteId(null);
     setAddError('');
+    setManageSearch('');
     setAddForm({ category: categories[0] ?? '', name: '', count: 1, newCategoryName: '' });
     setAddIsNewCat(false);
   };
@@ -100,6 +102,17 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
             <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
           </div>
           <button className="by" onClick={() => { setIsManaging(false); setConfirmDeleteId(null); }}>Done Editing</button>
+        </div>
+
+        {/* Search bar */}
+        <div className="sw" style={{ marginBottom: 10 }}>
+          <span>⌕</span>
+          <input
+            className="fi"
+            placeholder="Search items or serial numbers…"
+            value={manageSearch}
+            onChange={e => setManageSearch(e.target.value)}
+          />
         </div>
 
         {/* Add Item form */}
@@ -157,70 +170,101 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
 
         {/* Editable unit list grouped by category → name */}
         <div className="ca">
-          {Object.entries(nameGroups).map(([cat, byName]) => (
-            <div key={cat}>
-              <div className="dl">{cat}</div>
-              {Object.entries(byName).map(([name, units]) => (
-                <div key={name}>
-                  {/* Name group header */}
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '6px 14px 4px', background: 'var(--bg-sub)', borderBottom: '1px solid var(--bd-sub)',
-                  }}>
-                    <span style={{ fontSize: 11, color: 'var(--tx-muted)', letterSpacing: '.04em' }}>{name}</span>
-                    <button
-                      className="bo"
-                      style={{ padding: '3px 10px', fontSize: 10 }}
-                      onClick={() => {
-                        const maxNum = units.reduce((m, u) => Math.max(m, u.unit_number ?? 0), 0);
-                        onAdd({ category: cat, name, unit_number: maxNum + 1 });
-                      }}
-                    >
-                      + Add unit
-                    </button>
-                  </div>
-
-                  {/* Individual unit rows */}
-                  {units.map(unit => (
-                    <div key={unit.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      padding: '8px 14px', borderBottom: '1px solid var(--bd-sub)',
+          {Object.entries(nameGroups).map(([cat, byName]) => {
+            const q = manageSearch.toLowerCase();
+            // Filter names/units by search query
+            const filteredByName = Object.fromEntries(
+              Object.entries(byName)
+                .map(([name, units]) => [name, units.filter(u =>
+                  !q ||
+                  name.toLowerCase().includes(q) ||
+                  (u.serial_number ?? '').toLowerCase().includes(q)
+                )])
+                .filter(([, units]) => units.length > 0)
+            );
+            if (!Object.keys(filteredByName).length) return null;
+            return (
+              <div key={cat}>
+                <div className="dl">{cat}</div>
+                {Object.entries(filteredByName).map(([name, units]) => (
+                  <div key={name}>
+                    {/* Name group header */}
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '6px 14px 4px', background: 'var(--bg-sub)', borderBottom: '1px solid var(--bd-sub)',
                     }}>
-                      {/* Unit number badge */}
-                      <span style={{ fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.06em', flexShrink: 0, minWidth: 28 }}>
-                        #{unit.unit_number}
-                      </span>
-                      {/* Name */}
-                      <input
-                        className="fi"
-                        style={{ flex: 1 }}
-                        value={unit.name}
-                        onChange={e => onUpdate(unit.id, { name: e.target.value })}
-                      />
-                      {/* Serial number */}
-                      <input
-                        className="fi"
-                        style={{ flex: 1, color: 'var(--tx-muted)' }}
-                        placeholder="Serial number (optional)"
-                        value={unit.serial_number ?? ''}
-                        onChange={e => onUpdate(unit.id, { serial_number: e.target.value || null })}
-                      />
-                      {/* Delete */}
-                      {confirmDeleteId === unit.id ? (
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
-                          <span style={{ fontSize: 11, color: '#c44', whiteSpace: 'nowrap' }}>Delete?</span>
-                          <button className="bd" onClick={() => { onDelete(unit.id); setConfirmDeleteId(null); }}>Confirm</button>
-                          <button className="bo" onClick={() => setConfirmDeleteId(null)}>Cancel</button>
-                        </div>
-                      ) : (
-                        <button className="bd" style={{ flexShrink: 0 }} onClick={() => setConfirmDeleteId(unit.id)}>Delete</button>
-                      )}
+                      <span style={{ fontSize: 11, color: 'var(--tx-muted)', letterSpacing: '.04em' }}>{name}</span>
+                      <button
+                        className="bo"
+                        style={{ padding: '3px 10px', fontSize: 10 }}
+                        onClick={() => {
+                          const maxNum = byName[name].reduce((m, u) => Math.max(m, u.unit_number ?? 0), 0);
+                          onAdd({ category: cat, name, unit_number: maxNum + 1 });
+                        }}
+                      >
+                        + Add unit
+                      </button>
                     </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))}
+
+                    {/* Individual unit rows */}
+                    {units.map(unit => {
+                      const status = unit.status && unit.status !== 'available' ? unit.status : 'available';
+                      return (
+                        <div key={unit.id} style={{
+                          display: 'flex', alignItems: 'center', gap: 8,
+                          padding: '8px 14px', borderBottom: '1px solid var(--bd-sub)',
+                        }}>
+                          {/* Unit number badge */}
+                          <span style={{ fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.06em', flexShrink: 0, minWidth: 28 }}>
+                            #{unit.unit_number}
+                          </span>
+                          {/* Name */}
+                          <input
+                            className="fi"
+                            style={{ flex: 1 }}
+                            value={unit.name}
+                            onChange={e => onUpdate(unit.id, { name: e.target.value })}
+                          />
+                          {/* Serial number */}
+                          <input
+                            className="fi"
+                            style={{ flex: 1, color: 'var(--tx-muted)' }}
+                            placeholder="Serial number (optional)"
+                            value={unit.serial_number ?? ''}
+                            onChange={e => onUpdate(unit.id, { serial_number: e.target.value || null })}
+                          />
+                          {/* Status */}
+                          <select
+                            className="fi"
+                            style={{
+                              width: 100, flexShrink: 0,
+                              color: status === 'damaged' ? '#e8a000' : status === 'missing' ? '#c44' : 'var(--tx-muted)',
+                            }}
+                            value={status}
+                            onChange={e => onUpdate(unit.id, { status: e.target.value === 'available' ? null : e.target.value })}
+                          >
+                            <option value="available">OK</option>
+                            <option value="damaged">Damaged</option>
+                            <option value="missing">Missing</option>
+                          </select>
+                          {/* Delete */}
+                          {confirmDeleteId === unit.id ? (
+                            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }}>
+                              <span style={{ fontSize: 11, color: '#c44', whiteSpace: 'nowrap' }}>Delete?</span>
+                              <button className="bd" onClick={() => { onDelete(unit.id); setConfirmDeleteId(null); }}>Confirm</button>
+                              <button className="bo" onClick={() => setConfirmDeleteId(null)}>Cancel</button>
+                            </div>
+                          ) : (
+                            <button className="bd" style={{ flexShrink: 0 }} onClick={() => setConfirmDeleteId(unit.id)}>Delete</button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
           {inventory.length === 0 && (
             <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--tx-vdim)', fontSize: 12 }}>
               No items yet. Add one above.

@@ -27,6 +27,22 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [returnModalId, setReturnModalId]     = useState(null);
   const [showPast, setShowPast]               = useState(false);
+  const [packingOpen, setPackingOpen]         = useState(new Set());   // project IDs with checklist visible
+  const [packedItems, setPackedItems]         = useState({});          // { projectId: Set<unitId> }
+
+  const togglePackingOpen = (id) => setPackingOpen(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const togglePackedUnit = (projectId, unitId) => {
+    setPackedItems(prev => {
+      const set  = new Set(prev[projectId] ?? []);
+      set.has(unitId) ? set.delete(unitId) : set.add(unitId);
+      return { ...prev, [projectId]: set };
+    });
+  };
 
   const handleDelete = (id) => {
     onDelete(id);
@@ -83,16 +99,19 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
 
       <div style={{ display: 'grid', gap: 10 }}>
         {visibleProjects.map(project => {
-          const status       = projStatus(project, today);
-          const isConfirming = confirmDeleteId === project.id;
-          const kitGroups    = buildKitGroups(project.kit, inventory);
-          const allCats      = Object.keys(kitGroups);
-          const totalUnits   = Object.values(kitGroups).reduce((s, units) => s + units.length, 0);
-          const issue        = hasIssue(project.kit, inventory);
-          const isReturned   = !!project.returnedAt;
-          const isPacked     = !!project.packedAt;
-          const canPack      = !isPacked && !isReturned && (status.label === 'Upcoming' || status.label === 'Active');
-          const canReturn    = isPacked && !isReturned;
+          const status          = projStatus(project, today);
+          const isConfirming    = confirmDeleteId === project.id;
+          const kitGroups       = buildKitGroups(project.kit, inventory);
+          const allCats         = Object.keys(kitGroups);
+          const totalUnits      = Object.values(kitGroups).reduce((s, units) => s + units.length, 0);
+          const issue           = hasIssue(project.kit, inventory);
+          const isReturned      = !!project.returnedAt;
+          const isPacked        = !!project.packedAt;
+          const canPack         = !isPacked && !isReturned && (status.label === 'Upcoming' || status.label === 'Active');
+          const canReturn       = isPacked && !isReturned;
+          const isPackingOpen   = packingOpen.has(project.id);
+          const checkedSet      = packedItems[project.id] ?? new Set();
+          const packedCount     = [...checkedSet].filter(uid => project.kit.some(k => k.itemId === uid)).length;
 
           return (
             <div key={project.id} className="pc" style={{ opacity: isReturned ? 0.7 : 1 }}>
@@ -123,10 +142,27 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                           {kitGroups[cat].map(unit => {
-                            const flagged = unit.status && unit.status !== 'available';
+                            const flagged  = unit.status && unit.status !== 'available';
+                            const isChecked = checkedSet.has(unit.id);
                             return (
-                              <div key={unit.id} style={{ fontSize: 11, color: flagged ? '#c44' : 'var(--tx-sub)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span>{unitLabel(unit, inventory)}</span>
+                              <div
+                                key={unit.id}
+                                style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 8, cursor: isPackingOpen ? 'pointer' : 'default' }}
+                                onClick={isPackingOpen ? () => togglePackedUnit(project.id, unit.id) : undefined}
+                              >
+                                {isPackingOpen && (
+                                  <div style={{
+                                    width: 16, height: 16, borderRadius: 2, flexShrink: 0,
+                                    border: `1.5px solid ${isChecked ? 'var(--accent)' : 'var(--bd-ck)'}`,
+                                    background: isChecked ? 'var(--accent)' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  }}>
+                                    {isChecked && <span style={{ fontSize: 10, color: '#090909', fontWeight: 700 }}>✓</span>}
+                                  </div>
+                                )}
+                                <span style={{ color: isPackingOpen && isChecked ? 'var(--tx-dim)' : flagged ? '#c44' : 'var(--tx-sub)', textDecoration: isPackingOpen && isChecked ? 'line-through' : 'none' }}>
+                                  {unitLabel(unit, inventory)}
+                                </span>
                                 {unit.serial_number && (
                                   <span style={{ color: 'var(--tx-dim)', fontSize: 10, letterSpacing: '.04em' }}>
                                     {unit.serial_number}
@@ -152,6 +188,17 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                     </div>
                   ) : (
                     <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      {!isReturned && (
+                        <button
+                          className="bo"
+                          style={isPackingOpen ? { borderColor: 'var(--accent)', color: 'var(--accent)' } : {}}
+                          onClick={() => togglePackingOpen(project.id)}
+                        >
+                          {isPackingOpen
+                            ? `Packing ${packedCount}/${totalUnits}`
+                            : 'Packing List'}
+                        </button>
+                      )}
                       {canPack && (
                         <button className="bo" style={{ borderColor: '#1a4a28', color: '#4a9a68' }}
                           onClick={() => onKitPacked(project.id)}>

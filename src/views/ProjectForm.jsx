@@ -206,17 +206,38 @@ export default function ProjectForm({ inventory, categories, initialData, projec
             return (
               <div key={cat}>
                 <div className="dl">{cat}</div>
-                {Object.entries(byName).map(([name, nameUnits]) => (
+                {Object.entries(byName).map(([name, nameUnits]) => {
+                  const availableUnits = nameUnits.filter(u => {
+                    const sel = formKit.some(k => k.itemId === u.id);
+                    return !((bookedSet.has(u.id) && !sel) || (u.status && u.status !== 'available' && !sel));
+                  });
+                  const allSelected = availableUnits.length > 0 && availableUnits.every(u => formKit.some(k => k.itemId === u.id));
+                  return (
                   <div key={name}>
-                    {/* Item name header row (non-interactive) */}
+                    {/* Item name header row */}
                     <div style={{
-                      padding: '8px 14px 4px',
+                      padding: '6px 14px',
                       background: 'var(--bg-sub)',
                       borderBottom: '1px solid var(--bd-sub)',
-                      fontSize: 12,
-                      color: 'var(--tx-sub)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
                     }}>
-                      {name}
+                      <span style={{ fontSize: 12, color: 'var(--tx-sub)' }}>{name}</span>
+                      {nameUnits.length > 1 && availableUnits.length > 0 && (
+                        <button
+                          className="bo"
+                          style={{ padding: '2px 10px', fontSize: 10, flexShrink: 0 }}
+                          onClick={() => {
+                            if (allSelected) {
+                              setFormKit(prev => prev.filter(k => !availableUnits.some(u => u.id === k.itemId)));
+                            } else {
+                              const toAdd = availableUnits.filter(u => !formKit.some(k => k.itemId === u.id));
+                              setFormKit(prev => [...prev, ...toAdd.map(u => ({ itemId: u.id }))]);
+                            }
+                          }}
+                        >
+                          {allSelected ? 'Deselect All' : 'Select All'}
+                        </button>
+                      )}
                     </div>
 
                     {/* Individual unit sub-rows */}
@@ -260,7 +281,8 @@ export default function ProjectForm({ inventory, categories, initialData, projec
                       );
                     })}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             );
           })}
