@@ -96,6 +96,29 @@ const GLOBAL_STYLES = `
 
   /* DatePicker day hover */
   .dp-day:not([data-selected="true"]):hover{background:var(--bg-row-h) !important}
+
+  /* ── Layout classes (CSS-owned so media queries can override inline) ───── */
+  .app-hdr{background:var(--bg);border-bottom:1px solid var(--nav-bd);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+  .app-main{padding:26px 28px;max-width:1120px;margin:0 auto}
+  .bot-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--bg);border-top:1px solid var(--nav-bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .inv-titlerow{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:12px}
+  .inv-filterrow{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px}
+  .proj-hdr{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+  .issues-hdr{margin-bottom:24px}
+
+  /* ── Mobile (≤ 640px) ──────────────────────────────────────────────────── */
+  @media(max-width:768px){
+    .app-hdr{display:none}
+    .app-main{padding:28px 16px 86px}
+    .inv-titlerow{flex-direction:column;align-items:center;gap:10px;text-align:center}
+    .inv-manage-btn{align-self:stretch}
+    .proj-hdr{flex-direction:column;align-items:center;gap:12px;text-align:center}
+    .issues-hdr{text-align:center}
+    .theme-tog{bottom:76px!important}
+    .inv-filterrow{flex-wrap:nowrap}
+    .inv-filterrow select.fi{width:70px;min-width:70px}
+  }
+  @media(min-width:769px){.bot-nav{display:none}}
 `;
 
 export default function App() {
@@ -270,7 +293,7 @@ export default function App() {
         <div style={{ fontFamily: "'DM Mono',monospace", minHeight: '100vh', background: 'var(--bg)', color: 'var(--tx)', transition: 'background .2s,color .2s' }}>
           <style>{GLOBAL_STYLES}</style>
 
-          <header style={{ background: 'var(--bg)', borderBottom: '1px solid var(--nav-bd)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px' }}>
+          <header className="app-hdr">
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <span style={{ fontFamily: "'Bebas Neue'", fontSize: 26, color: 'var(--accent)', letterSpacing: '.08em' }}>PERSPECTIVE PICTURES</span>
               <span style={{ fontFamily: "'Bebas Neue'", fontSize: 18, color: 'var(--hdr-sub)', letterSpacing: '.08em' }}>/ KIT</span>
@@ -310,7 +333,7 @@ export default function App() {
             </nav>
           </header>
 
-          <main style={{ padding: '26px 28px', maxWidth: 1120, margin: '0 auto' }}>
+          <main className="app-main">
             {loading && (
               <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--tx-vdim)', fontSize: 12, letterSpacing: '.1em' }}>
                 Loading…
@@ -373,8 +396,43 @@ export default function App() {
             )}
           </main>
 
+          {/* Bottom nav – mobile only (hidden ≥ 641px via CSS) */}
+          <nav className="bot-nav">
+            {[['inventory', 'Inventory'], ['projects', 'Projects'], ['issues', 'Issues']].map(([key, label]) => {
+              const active = view === key || (view === 'form' && key === 'projects');
+              return (
+                <button
+                  key={key}
+                  onClick={() => setView(key)}
+                  style={{
+                    flex: 1, background: 'none', border: 'none',
+                    borderTop: `2px solid ${active ? 'var(--accent)' : 'transparent'}`,
+                    color: active ? 'var(--accent)' : 'var(--tx-muted)',
+                    fontSize: 10, letterSpacing: '.1em', textTransform: 'uppercase',
+                    fontFamily: "'DM Mono',monospace", padding: '12px 0 10px',
+                    cursor: 'pointer', position: 'relative', transition: 'color .15s',
+                  }}
+                  aria-current={view === key ? 'page' : undefined}
+                >
+                  {label}
+                  {key === 'issues' && issueCount > 0 && (
+                    <span style={{
+                      position: 'absolute', top: 7, right: '20%',
+                      background: '#c44', color: '#fff',
+                      fontSize: 9, fontWeight: 700, borderRadius: 10,
+                      padding: '1px 5px', lineHeight: 1.4,
+                    }}>
+                      {issueCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
           {/* Dark / light mode toggle */}
           <button
+            className="theme-tog"
             onClick={() => setIsDark(d => !d)}
             style={{
               position: 'fixed', bottom: 24, right: 24, zIndex: 500,

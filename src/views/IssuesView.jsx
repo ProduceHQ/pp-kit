@@ -48,7 +48,7 @@ export default function IssuesView({ inventory, onResolve }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
+      <div className="issues-hdr">
         <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>ISSUES</h1>
         <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>
           {flagged.length

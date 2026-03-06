@@ -56,7 +56,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
         />
       )}
 
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22 }}>
+      <div className="proj-hdr">
         <div>
           <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>PROJECTS</h1>
           <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>

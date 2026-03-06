@@ -94,7 +94,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
   if (isManaging) {
     return (
       <div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div className="inv-titlerow" style={{ marginBottom: 20 }}>
           <div>
             <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>MANAGE INVENTORY</h1>
             <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
@@ -234,28 +234,28 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
   // ── VIEW MODE ──────────────────────────────────────────────────────────────
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+      <div className="inv-titlerow">
         <div>
           <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>KIT INVENTORY</h1>
           <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-          <button className="bo" onClick={startManaging}>Manage Inventory</button>
-          <div>
-            <label style={{ display: 'block', fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
-              Availability as of
-            </label>
-            <DatePicker value={checkDate} onChange={setCheckDate} />
-          </div>
-          <div className="sw" style={{ width: 200 }}>
-            <span>⌕</span>
-            <input className="fi" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <select className="fi" style={{ width: 'auto' }} value={category} onChange={e => setCategory(e.target.value)}>
-            <option>All</option>
-            {categories.map(c => <option key={c}>{c}</option>)}
-          </select>
+        <button className="bo inv-manage-btn" onClick={startManaging}>Manage Inventory</button>
+      </div>
+      <div className="inv-filterrow">
+        <div>
+          <label style={{ display: 'block', fontSize: 10, color: 'var(--tx-dim)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 5 }}>
+            Availability as of
+          </label>
+          <DatePicker value={checkDate} onChange={setCheckDate} />
         </div>
+        <div className="sw" style={{ flex: 1, minWidth: 0 }}>
+          <span>⌕</span>
+          <input className="fi" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+        <select className="fi" style={{ width: 'auto' }} value={category} onChange={e => setCategory(e.target.value)}>
+          <option>All</option>
+          {categories.map(c => <option key={c}>{c}</option>)}
+        </select>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 10 }}>
