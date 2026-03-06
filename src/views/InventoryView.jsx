@@ -258,7 +258,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 10 }}>
+      <div style={{ columns: '280px', columnGap: 10 }}>
         {categories.filter(c => category === 'All' || c === category).map(cat => {
           const units = filteredUnits.filter(u => u.category === cat);
           if (!units.length) return null;
@@ -268,7 +268,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
           for (const unit of units) (byName[unit.name] ??= []).push(unit);
 
           return (
-            <div key={cat} className="ca">
+            <div key={cat} className="ca" style={{ breakInside: 'avoid', marginBottom: 10 }}>
               <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--bd-cat)', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 10, letterSpacing: '.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>{cat}</span>
                 <span style={{ fontSize: 10, color: 'var(--tx-vdim)' }}>({Object.keys(byName).length})</span>
