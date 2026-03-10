@@ -130,6 +130,7 @@ export default function App() {
   const [projects, setProjects]       = useState([]);
   const [inventory, setInventory]     = useState([]);
   const [editProject, setEditProject] = useState(null);
+  const [packedItems, setPackedItems] = useState({});   // { projectId: Set<unitId> }
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState(null);
 
@@ -172,6 +173,14 @@ export default function App() {
   // ── Project CRUD ───────────────────────────────────────────────────────────
   const openNew  = ()        => { setEditProject(null);    setView('form'); };
   const openEdit = (project) => { setEditProject(project); setView('form'); };
+
+  const togglePackedUnit = (projectId, unitId) => {
+    setPackedItems(prev => {
+      const set = new Set(prev[projectId] ?? []);
+      set.has(unitId) ? set.delete(unitId) : set.add(unitId);
+      return { ...prev, [projectId]: set };
+    });
+  };
 
   const handleProjectSave = async (data) => {
     try {
@@ -372,6 +381,8 @@ export default function App() {
                     onDelete={handleProjectDelete}
                     onKitPacked={handleKitPacked}
                     onKitReturned={handleKitReturned}
+                    packedItems={packedItems}
+                    onTogglePacked={togglePackedUnit}
                   />
                 )}
                 {view === 'issues' && (

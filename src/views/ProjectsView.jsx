@@ -22,27 +22,18 @@ function hasIssue(kit, inventory) {
   });
 }
 
-export default function ProjectsView({ inventory, projects, onNew, onEdit, onDelete, onKitPacked, onKitReturned }) {
+export default function ProjectsView({ inventory, projects, onNew, onEdit, onDelete, onKitPacked, onKitReturned, packedItems, onTogglePacked }) {
   const today = new Date().toISOString().split('T')[0];
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [returnModalId, setReturnModalId]     = useState(null);
   const [showPast, setShowPast]               = useState(false);
   const [packingOpen, setPackingOpen]         = useState(new Set());   // project IDs with checklist visible
-  const [packedItems, setPackedItems]         = useState({});          // { projectId: Set<unitId> }
 
   const togglePackingOpen = (id) => setPackingOpen(prev => {
     const next = new Set(prev);
     next.has(id) ? next.delete(id) : next.add(id);
     return next;
   });
-
-  const togglePackedUnit = (projectId, unitId) => {
-    setPackedItems(prev => {
-      const set  = new Set(prev[projectId] ?? []);
-      set.has(unitId) ? set.delete(unitId) : set.add(unitId);
-      return { ...prev, [projectId]: set };
-    });
-  };
 
   const handleDelete = (id) => {
     onDelete(id);
@@ -129,6 +120,11 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                 <span style={{ color: 'var(--accent)' }}>{project.number || '—'}</span>
                 <span>{fmtDate(project.startDate)} — {fmtDate(project.endDate)}</span>
                 <span>{totalUnits} unit{totalUnits !== 1 ? 's' : ''}</span>
+                {packedCount > 0 && !isPacked && (
+                  <span style={{ color: packedCount === totalUnits ? '#4a9a68' : 'var(--tx-dim)' }}>
+                    {packedCount}/{totalUnits} packed
+                  </span>
+                )}
               </div>
 
               {/* Actions */}
@@ -187,7 +183,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                           <div
                             key={unit.id}
                             style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 8, cursor: isPackingOpen ? 'pointer' : 'default' }}
-                            onClick={isPackingOpen ? () => togglePackedUnit(project.id, unit.id) : undefined}
+                            onClick={isPackingOpen ? () => onTogglePacked(project.id, unit.id) : undefined}
                           >
                             {isPackingOpen && (
                               <div style={{
