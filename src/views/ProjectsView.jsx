@@ -3,6 +3,7 @@ import { fmtDate, projStatus, unitLabel } from '../utils';
 import Pill from '../components/Pill';
 import KitReturnModal from '../components/KitReturnModal';
 import { downloadKitPdf } from '../lib/pdfExport';
+import { downloadKitXlsx } from '../lib/xlsxExport';
 
 // Groups project kit by category, silently skipping orphaned unit references.
 function buildKitGroups(kit, inventory) {
@@ -164,6 +165,9 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                     {!isReturned && (
                       <button className="bo" onClick={() => onEdit(project)}>Edit</button>
                     )}
+                    <button className="bo" onClick={() => downloadKitXlsx(project, inventory)}>
+                      Sheets
+                    </button>
                     <button className="bo" onClick={() => downloadKitPdf(project, inventory)}>
                       PDF
                     </button>
