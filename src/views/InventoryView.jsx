@@ -98,8 +98,8 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
       <div>
         <div className="inv-titlerow" style={{ marginBottom: 20 }}>
           <div>
-            <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>MANAGE INVENTORY</h1>
-            <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
+            <h1 style={{ fontWeight: 900, fontSize: 34, letterSpacing: '-.02em', lineHeight: 1, textTransform: 'uppercase' }}>MANAGE INVENTORY</h1>
+            <p style={{ color: 'var(--tx-dim)', fontSize: 11, fontWeight: 500, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
           </div>
           <button className="by" onClick={() => { setIsManaging(false); setConfirmDeleteId(null); }}>Done Editing</button>
         </div>
@@ -280,8 +280,8 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
     <div>
       <div className="inv-titlerow">
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>KIT INVENTORY</h1>
-          <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
+          <h1 style={{ fontWeight: 900, fontSize: 34, letterSpacing: '-.02em', lineHeight: 1, textTransform: 'uppercase' }}>KIT INVENTORY</h1>
+          <p style={{ color: 'var(--tx-dim)', fontSize: 11, fontWeight: 500, marginTop: 4 }}>{inventory.length} units across {categories.length} categories</p>
         </div>
         <button className="bo inv-manage-btn" onClick={startManaging}>Manage Inventory</button>
       </div>
@@ -313,8 +313,8 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
 
           return (
             <div key={cat} className="ca" style={{ breakInside: 'avoid', marginBottom: 10 }}>
-              <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--bd-cat)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, letterSpacing: '.1em', color: 'var(--accent)', textTransform: 'uppercase' }}>{cat}</span>
+              <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.12em', color: 'var(--accent)', textTransform: 'uppercase' }}>{cat}</span>
                 <span style={{ fontSize: 10, color: 'var(--tx-vdim)' }}>({Object.keys(byName).length})</span>
               </div>
               {Object.entries(byName).map(([name, nameUnits]) => {
@@ -324,7 +324,7 @@ export default function InventoryView({ inventory, categories, projects, onAdd, 
                 const allOut = free === 0;
                 const someOut = free < total;
                 return (
-                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: '1px solid var(--bd-sub)' }}>
+                  <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 14px', borderBottom: '1px solid var(--bd-sub)', gap: 8 }}>
                     <span style={{ fontSize: 12, color: allOut ? 'var(--tx-vdim)' : 'var(--tx)' }}>{name}</span>
                     <div style={{ marginLeft: 8, flexShrink: 0 }}>
                       {allOut

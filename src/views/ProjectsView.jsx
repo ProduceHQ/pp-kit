@@ -67,8 +67,8 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
 
       <div className="proj-hdr">
         <div>
-          <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>PROJECTS</h1>
-          <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>
+          <h1 style={{ fontWeight: 900, fontSize: 34, letterSpacing: '-.02em', lineHeight: 1, textTransform: 'uppercase' }}>PROJECTS</h1>
+          <p style={{ color: 'var(--tx-dim)', fontSize: 11, fontWeight: 500, marginTop: 4 }}>
             {activeProjects.length} active booking{activeProjects.length !== 1 ? 's' : ''}
             {pastProjects.length > 0 && ` · ${pastProjects.length} past`}
           </p>
@@ -84,9 +84,9 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
       </div>
 
       {!visibleProjects.length && (
-        <div style={{ border: '1px dashed var(--bd-inp)', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
-          <div style={{ fontFamily: "'Bebas Neue'", fontSize: 28, marginBottom: 8 }}>NO PROJECTS YET</div>
-          <div style={{ fontSize: 12 }}>Create a project to start booking kit</div>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
+          <div style={{ fontWeight: 900, fontSize: 22, letterSpacing: '-.01em', textTransform: 'uppercase', marginBottom: 8 }}>NO PROJECTS YET</div>
+          <div style={{ fontSize: 12, fontWeight: 500 }}>Create a project to start booking kit</div>
         </div>
       )}
 
@@ -110,7 +110,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
             <div key={project.id} className="pc" style={{ opacity: isReturned ? 0.7 : 1 }}>
               {/* Title + pills */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-                <h2 style={{ fontFamily: "'Bebas Neue'", fontSize: 21, letterSpacing: '.04em', color: 'var(--tx)' }}>{project.name}</h2>
+                <h2 style={{ fontWeight: 800, fontSize: 18, letterSpacing: '-.01em', color: 'var(--tx)', textTransform: 'uppercase' }}>{project.name}</h2>
                 <Pill variant={status.variant}>{status.label}</Pill>
                 {isPacked && !isReturned && <Pill variant="green">Packed</Pill>}
                 {isReturned && <Pill variant="grey">Returned</Pill>}
@@ -151,13 +151,13 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                       </button>
                     )}
                     {canPack && (
-                      <button className="bo" style={{ borderColor: '#1a4a28', color: '#4a9a68' }}
+                      <button className="bo" style={{ borderColor: 'rgba(74,222,128,.35)', color: '#4ade80' }}
                         onClick={() => onKitPacked(project.id)}>
                         Kit Packed
                       </button>
                     )}
                     {canReturn && (
-                      <button className="bo" style={{ borderColor: '#4a3a00', color: '#c0a040' }}
+                      <button className="bo" style={{ borderColor: 'rgba(255,168,80,.35)', color: 'var(--accent)' }}
                         onClick={() => setReturnModalId(project.id)}>
                         Kit Returned
                       </button>
@@ -180,7 +180,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
               <div>
                 {allCats.map(cat => (
                   <div key={cat} style={{ marginBottom: 10 }}>
-                    <div style={{ fontSize: 9, color: 'var(--accent)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent)', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: 5 }}>
                       {cat}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

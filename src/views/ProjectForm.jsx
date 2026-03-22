@@ -98,11 +98,11 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Unsaved changes warning banner */}
       {showLeaveWarning && (
         <div style={{
-          background: '#130a00', border: '1px solid #5a3a00', borderRadius: 3,
+          background: 'rgba(255,168,80,.08)', borderRadius: 12,
           padding: '13px 18px', marginBottom: 16,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
         }}>
-          <span style={{ fontSize: 12, color: '#e0a040' }}>⚠ You have unsaved changes. Leave anyway?</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--accent)' }}>⚠ You have unsaved changes. Leave anyway?</span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button className="bo" onClick={onBack}>Discard changes</button>
             <button className="by" onClick={() => setShowLeaveWarning(false)}>Keep editing</button>
@@ -113,7 +113,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22 }}>
         <button className="bo" onClick={handleBack}>← Back</button>
-        <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 32, letterSpacing: '.04em' }}>
+        <h1 style={{ fontWeight: 900, fontSize: 30, letterSpacing: '-.01em', textTransform: 'uppercase' }}>
           {editId ? 'EDIT PROJECT' : 'NEW PROJECT'}
         </h1>
       </div>
@@ -291,8 +291,8 @@ export default function ProjectForm({ inventory, categories, initialData, projec
 
       {/* Booking summary */}
       {formKit.length > 0 && (
-        <div className="ca" style={{ padding: '14px 18px', marginBottom: 14, borderColor: '#1c1500' }}>
-          <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
+        <div className="ca" style={{ padding: '14px 18px', marginBottom: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 10 }}>
             Booking Summary
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -300,8 +300,8 @@ export default function ProjectForm({ inventory, categories, initialData, projec
               const unit = inventory.find(u => u.id === k.itemId);
               return unit ? (
                 <span key={k.itemId} style={{
-                  background: '#130f00', border: '1px solid #2a2000',
-                  borderRadius: 2, padding: '4px 12px', fontSize: 11, color: '#c0a040',
+                  background: 'rgba(255,168,80,.08)', borderRadius: 8,
+                  padding: '4px 12px', fontSize: 11, fontWeight: 600, color: 'var(--accent)',
                 }}>
                   {unitLabel(unit, inventory)}
                 </span>
@@ -314,8 +314,8 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Validation error */}
       {error && (
         <div style={{
-          background: '#130606', border: '1px solid #4a1515', borderRadius: 2,
-          padding: '10px 16px', fontSize: 12, color: '#e07070', marginBottom: 14,
+          background: 'rgba(255,115,81,.08)', borderRadius: 10,
+          padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#ff7351', marginBottom: 14,
         }}>
           ⚠ {error}
         </div>

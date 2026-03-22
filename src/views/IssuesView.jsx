@@ -11,7 +11,7 @@ export default function IssuesView({ inventory, onResolve }) {
     return (
       <div style={{ marginBottom: 20 }}>
         <div style={{
-          fontSize: 10, color: 'var(--accent)', letterSpacing: '.12em',
+          fontSize: 10, fontWeight: 700, color: 'var(--tx-muted)', letterSpacing: '.15em',
           textTransform: 'uppercase', marginBottom: 10,
         }}>
           {title} ({units.length})
@@ -49,8 +49,8 @@ export default function IssuesView({ inventory, onResolve }) {
   return (
     <div>
       <div className="issues-hdr">
-        <h1 style={{ fontFamily: "'Bebas Neue'", fontSize: 36, letterSpacing: '.04em', lineHeight: 1 }}>ISSUES</h1>
-        <p style={{ color: 'var(--tx-dim)', fontSize: 11, marginTop: 4 }}>
+        <h1 style={{ fontWeight: 900, fontSize: 34, letterSpacing: '-.02em', lineHeight: 1, textTransform: 'uppercase' }}>ISSUES</h1>
+        <p style={{ color: 'var(--tx-dim)', fontSize: 11, fontWeight: 500, marginTop: 4 }}>
           {flagged.length
             ? `${flagged.length} item${flagged.length !== 1 ? 's' : ''} need attention`
             : 'No issues — all kit is accounted for'}
@@ -58,9 +58,9 @@ export default function IssuesView({ inventory, onResolve }) {
       </div>
 
       {!flagged.length && (
-        <div style={{ border: '1px dashed var(--bd-inp)', borderRadius: 3, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
-          <div style={{ fontFamily: "'Bebas Neue'", fontSize: 28, marginBottom: 8 }}>ALL CLEAR</div>
-          <div style={{ fontSize: 12 }}>No damaged or missing items</div>
+        <div style={{ background: 'var(--bg-card)', borderRadius: 16, padding: '70px 0', textAlign: 'center', color: 'var(--tx-vdim)' }}>
+          <div style={{ fontWeight: 900, fontSize: 22, letterSpacing: '-.01em', textTransform: 'uppercase', marginBottom: 8 }}>ALL CLEAR</div>
+          <div style={{ fontSize: 12, fontWeight: 500 }}>No damaged or missing items</div>
         </div>
       )}
 

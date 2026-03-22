@@ -1,9 +1,9 @@
 const VARIANTS = {
-  green: { bg: '#0d2918', bd: '#1a5c30', tx: '#4ade80', symbol: '●' },
-  amber: { bg: '#2a1e00', bd: '#5a3e00', tx: '#fbbf24', symbol: '◐' },
-  red:   { bg: '#2a0d0d', bd: '#5a1a1a', tx: '#f87171', symbol: '○' },
-  blue:  { bg: '#0d1d2e', bd: '#1a3a5c', tx: '#60a5fa', symbol: '◆' },
-  grey:  { bg: '#181818', bd: '#2a2a2a', tx: '#777',    symbol: '◌' },
+  green: { bg: 'rgba(74,222,128,.1)',  bd: 'rgba(74,222,128,.22)', tx: '#4ade80', symbol: '●' },
+  amber: { bg: 'rgba(255,168,80,.1)',  bd: 'rgba(255,168,80,.25)', tx: '#ffa850', symbol: '◐' },
+  red:   { bg: 'rgba(255,115,81,.1)',  bd: 'rgba(255,115,81,.25)', tx: '#ff7351', symbol: '○' },
+  blue:  { bg: 'rgba(96,165,250,.1)',  bd: 'rgba(96,165,250,.22)', tx: '#60a5fa', symbol: '◆' },
+  grey:  { bg: 'rgba(118,117,117,.1)', bd: 'rgba(118,117,117,.2)', tx: '#adaaaa', symbol: '◌' },
 };
 
 export default function Pill({ children, variant = 'grey' }) {
@@ -11,11 +11,12 @@ export default function Pill({ children, variant = 'grey' }) {
   return (
     <span style={{
       background: s.bg, border: `1px solid ${s.bd}`, color: s.tx,
-      padding: '2px 10px', borderRadius: 20, fontSize: 11,
-      fontWeight: 600, letterSpacing: '0.03em', whiteSpace: 'nowrap',
+      padding: '2px 10px', borderRadius: 20, fontSize: 10,
+      fontWeight: 700, letterSpacing: '0.06em', whiteSpace: 'nowrap',
       display: 'inline-flex', alignItems: 'center', gap: 5,
+      textTransform: 'uppercase',
     }}>
-      <span aria-hidden="true" style={{ fontSize: 8 }}>{s.symbol}</span>
+      <span aria-hidden="true" style={{ fontSize: 7 }}>{s.symbol}</span>
       {children}
     </span>
   );
