@@ -40,7 +40,7 @@ export default function KitReturnModal({ project, inventory, onSubmit, onCancel 
       }}>
         {/* Header */}
         <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--bd-inp)' }}>
-          <div style={{ fontFamily: "'Bebas Neue'", fontSize: 22, letterSpacing: '.04em', color: 'var(--tx)' }}>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 20, letterSpacing: '.04em', color: 'var(--tx)' }}>
             KIT RETURN — {project.name}
           </div>
           <div style={{ fontSize: 11, color: 'var(--tx-dim)', marginTop: 4 }}>

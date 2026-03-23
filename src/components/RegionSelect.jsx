@@ -19,16 +19,16 @@ export default function RegionSelect({ onSelect }) {
     <div style={{
       minHeight: '100vh', background: '#090909', display: 'flex',
       alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'DM Mono', monospace",
+      fontFamily: "'Inter', sans-serif",
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap');
         .rs-btn {
           background: none;
           border: 1px solid #2a2a2a;
           color: #888;
-          font-family: 'DM Mono', monospace;
+          font-family: 'Inter', sans-serif;
           font-size: 13px;
+          font-weight: 700;
           letter-spacing: .12em;
           text-transform: uppercase;
           padding: 18px 48px;
@@ -45,10 +45,10 @@ export default function RegionSelect({ onSelect }) {
       `}</style>
 
       <div style={{ width: 280, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Bebas Neue'", fontSize: 32, color: '#e8b842', letterSpacing: '.08em', marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 28, color: '#e8b842', letterSpacing: '.05em', marginBottom: 4 }}>
           PERSPECTIVE PICTURES
         </div>
-        <div style={{ fontFamily: "'Bebas Neue'", fontSize: 20, color: '#2a2a2a', letterSpacing: '.08em', marginBottom: 40 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 18, color: '#2a2a2a', letterSpacing: '.05em', marginBottom: 40 }}>
           / KIT
         </div>
 

@@ -143,7 +143,8 @@ export default function DatePicker({ value, onChange, placeholder = 'Select date
                     fontSize:    12,
                     cursor:      'pointer',
                     textAlign:   'center',
-                    fontFamily:  "'DM Mono', monospace",
+                    fontFamily:  "'Inter', sans-serif",
+                    fontVariantNumeric: 'tabular-nums',
                     fontWeight:  isSel ? 600 : 400,
                   }}
                 >
