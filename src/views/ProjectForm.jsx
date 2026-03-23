@@ -119,7 +119,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       </div>
 
       {/* Project details */}
-      <div className="ca" style={{ padding: '18px 20px', marginBottom: 14 }}>
+      <div className="ca" style={{ padding: '18px 20px', marginBottom: 14, overflow: 'visible' }}>
         <div style={{ fontSize: 10, color: 'var(--accent)', letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 14 }}>Project Details</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div style={{ gridColumn: '1/-1' }}>
