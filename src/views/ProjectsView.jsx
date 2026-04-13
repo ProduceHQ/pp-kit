@@ -157,7 +157,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                       </button>
                     )}
                     {canReturn && (
-                      <button className="bo" style={{ borderColor: 'rgba(255,168,80,.35)', color: 'var(--accent)' }}
+                      <button className="bo" style={{ borderColor: 'rgba(255,140,0,.35)', color: 'var(--accent)' }}
                         onClick={() => setReturnModalId(project.id)}>
                         Kit Returned
                       </button>

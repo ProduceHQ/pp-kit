@@ -98,7 +98,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Unsaved changes warning banner */}
       {showLeaveWarning && (
         <div style={{
-          background: 'rgba(255,168,80,.08)', borderRadius: 12,
+          background: 'rgba(255,140,0,.08)', borderRadius: 12,
           padding: '13px 18px', marginBottom: 16,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
         }}>
@@ -300,7 +300,7 @@ export default function ProjectForm({ inventory, categories, initialData, projec
               const unit = inventory.find(u => u.id === k.itemId);
               return unit ? (
                 <span key={k.itemId} style={{
-                  background: 'rgba(255,168,80,.08)', borderRadius: 8,
+                  background: 'rgba(255,140,0,.08)', borderRadius: 8,
                   padding: '4px 12px', fontSize: 11, fontWeight: 600, color: 'var(--accent)',
                 }}>
                   {unitLabel(unit, inventory)}
@@ -314,8 +314,8 @@ export default function ProjectForm({ inventory, categories, initialData, projec
       {/* Validation error */}
       {error && (
         <div style={{
-          background: 'rgba(255,115,81,.08)', borderRadius: 10,
-          padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#ff7351', marginBottom: 14,
+          background: 'rgba(255,140,0,.08)', borderRadius: 10,
+          padding: '10px 16px', fontSize: 12, fontWeight: 600, color: '#FF8C00', marginBottom: 14,
         }}>
           ⚠ {error}
         </div>

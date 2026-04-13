@@ -1,7 +1,7 @@
 const VARIANTS = {
   green: { bg: 'rgba(74,222,128,.1)',  bd: 'rgba(74,222,128,.22)', tx: '#4ade80', symbol: '●' },
-  amber: { bg: 'rgba(255,168,80,.1)',  bd: 'rgba(255,168,80,.25)', tx: '#ffa850', symbol: '◐' },
-  red:   { bg: 'rgba(255,115,81,.1)',  bd: 'rgba(255,115,81,.25)', tx: '#ff7351', symbol: '○' },
+  amber: { bg: 'rgba(255,140,0,.1)',  bd: 'rgba(255,140,0,.25)', tx: '#FF8C00', symbol: '◐' },
+  red:   { bg: 'rgba(255,140,0,.1)',  bd: 'rgba(255,140,0,.25)', tx: '#FF8C00', symbol: '○' },
   blue:  { bg: 'rgba(96,165,250,.1)',  bd: 'rgba(96,165,250,.22)', tx: '#60a5fa', symbol: '◆' },
   grey:  { bg: 'rgba(118,117,117,.1)', bd: 'rgba(118,117,117,.2)', tx: '#adaaaa', symbol: '◌' },
 };

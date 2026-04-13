@@ -38,14 +38,14 @@ export default function RegionSelect({ onSelect }) {
           transition: all .15s;
         }
         .rs-btn:hover {
-          border-color: #e8b842;
-          color: #e8b842;
+          border-color: #FF8C00;
+          color: #FF8C00;
           background: #0d0a00;
         }
       `}</style>
 
       <div style={{ width: 280, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 28, color: '#e8b842', letterSpacing: '.05em', marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 28, color: '#FF8C00', letterSpacing: '.05em', marginBottom: 4 }}>
           PERSPECTIVE PICTURES
         </div>
         <div style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, fontSize: 18, color: '#2a2a2a', letterSpacing: '.05em', marginBottom: 40 }}>
