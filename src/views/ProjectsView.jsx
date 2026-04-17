@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fmtDate, projStatus, unitLabel } from '../utils';
+import { fmtDate, projStatus, unitLabel, buildBookedMap } from '../utils';
 import Pill from '../components/Pill';
 import KitReturnModal from '../components/KitReturnModal';
 import { downloadKitPdf } from '../lib/pdfExport';
@@ -105,6 +105,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
           const isPackingOpen   = packingOpen.has(project.id);
           const checkedSet      = packedItems[project.id] ?? new Set();
           const packedCount     = [...checkedSet].filter(uid => project.kit.some(k => k.itemId === uid)).length;
+          const bookedByOthers  = buildBookedMap(inventory, project.startDate, project.endDate, projects, project.id);
 
           return (
             <div key={project.id} className="pc" style={{ opacity: isReturned ? 0.7 : 1 }}>
@@ -187,11 +188,12 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                       {kitGroups[cat].map(unit => {
                         const flagged  = unit.status && unit.status !== 'available';
                         const isChecked = checkedSet.has(unit.id);
+                        const bookedElsewhere = bookedByOthers.has(unit.id);
                         return (
                           <div
                             key={unit.id}
-                            style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 8, cursor: isPackingOpen ? 'pointer' : 'default' }}
-                            onClick={isPackingOpen ? () => onTogglePacked(project.id, unit.id) : undefined}
+                            style={{ fontSize: 11, display: 'flex', alignItems: 'center', gap: 8, cursor: isPackingOpen && !bookedElsewhere ? 'pointer' : 'default', opacity: bookedElsewhere ? 0.45 : 1 }}
+                            onClick={isPackingOpen && !bookedElsewhere ? () => onTogglePacked(project.id, unit.id) : undefined}
                           >
                             {isPackingOpen && (
                               <div style={{
@@ -211,6 +213,7 @@ export default function ProjectsView({ inventory, projects, onNew, onEdit, onDel
                                 {unit.serial_number}
                               </span>
                             )}
+                            {bookedElsewhere && <Pill variant="red">Booked</Pill>}
                             {flagged && <Pill variant={unit.status === 'missing' ? 'red' : 'amber'}>{unit.status}</Pill>}
                           </div>
                         );
